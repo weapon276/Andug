@@ -9,14 +9,22 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 
-// Función para obtener todas las cotizaciones
 function obtenerCotizaciones($conn) {
-    $sql = "SELECT c.*, cl.Nombre as ClienteNombre FROM cotizacion c 
-            JOIN cliente cl ON c.ID_Cliente = cl.ID_Cliente";
+    $sql = "SELECT c.*, 
+                   cl.Nombre as ClienteNombre, 
+                   e.Nombre as EmpleadoNombre, 
+                   cam.Unidad as CamionUnidad, 
+                   cam.Placas as CamionPlacas, 
+                   cam.Tipo as CamionTipo 
+            FROM cotizacion c
+            JOIN cliente cl ON c.ID_Cliente = cl.ID_Cliente
+            JOIN empleado e ON c.fk_idEmpleado = e.ID_Empleado
+            JOIN camion cam ON cam.ID_Camion = (SELECT ID_Camion FROM cotizacion_camion WHERE cotizacion_camion.ID_Cotizacion = c.ID_Cotizacion LIMIT 1)";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 $cotizaciones = obtenerCotizaciones($conn);
 
@@ -58,42 +66,49 @@ function calcularEstadoVigencia($vigencia) {
 <div class="container mt-5">
     <h1>Gestión de Cotizaciones</h1>
     <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID Cotización</th>
-                <th>Cliente</th>
-                <th>Descripción</th>
-                <th>Monto</th>
-                <th>Fecha</th>
-                <th>Vigencia</th>
-                <th>Estado de Vigencia</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($cotizaciones as $cotizacion): 
-                $estado_vigencia = calcularEstadoVigencia($cotizacion['Vigencia']);
+    <thead>
+    <thead>
+    <tr>
+        <th>ID Cotización</th>
+        <th>Cliente</th>
+        <th>Empleado</th>
+        <th>Descripción</th>
+        <th>Monto</th>
+        <th>Fecha</th>
+        <th>Vigencia</th>
+        <th>Estado de Vigencia</th>
+        <th>Camión</th>
+    </tr>
+</thead>
+<tbody>
+    <?php foreach ($cotizaciones as $cotizacion): 
+        $estado_vigencia = calcularEstadoVigencia($cotizacion['Vigencia']);
+    ?>
+    <tr>
+        <td><?php echo htmlspecialchars($cotizacion['ID_Cotizacion'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['ClienteNombre'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['EmpleadoNombre'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['Descripcion'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['Monto'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['Fecha'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['Vigencia'] ?? ''); ?></td>
+        <td class="<?php echo $estado_vigencia; ?>">
+            <?php 
+            if ($estado_vigencia == 'vencido') {
+                echo 'Vencido';
+            } elseif ($estado_vigencia == 'por_vencer') {
+                echo 'Por vencer';
+            } else {
+                echo 'Vigente';
+            }
             ?>
-            <tr>
-                <td><?php echo $cotizacion['ID_Cotizacion']; ?></td>
-                <td><?php echo htmlspecialchars($cotizacion['ClienteNombre']); ?></td>
-                <td><?php echo htmlspecialchars($cotizacion['Descripcion']); ?></td>
-                <td><?php echo $cotizacion['Monto']; ?></td>
-                <td><?php echo $cotizacion['Fecha']; ?></td>
-                <td><?php echo $cotizacion['Vigencia']; ?></td>
-                <td class="<?php echo $estado_vigencia; ?>">
-                    <?php 
-                    if ($estado_vigencia == 'vencido') {
-                        echo 'Vencido';
-                    } elseif ($estado_vigencia == 'por_vencer') {
-                        echo 'Por vencer';
-                    } else {
-                        echo 'Vigente';
-                    }
-                    ?>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
+        </td>
+        <td><?php echo htmlspecialchars($cotizacion['CamionUnidad'] ?? '') . " - " . htmlspecialchars($cotizacion['CamionPlacas'] ?? ''); ?></td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
+
+
     </table>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

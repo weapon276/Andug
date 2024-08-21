@@ -124,7 +124,7 @@ function generarMenu($user_type) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="mensaje.php"><i class="fa fa-envelope"></i></a>
+                        <a class="nav-link active" aria-current="page" href="notificaciones.php"><i class="fa fa-envelope"></i></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#"><i class="fa fa-user"></i></a>

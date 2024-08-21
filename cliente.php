@@ -10,13 +10,22 @@ if (!isset($_SESSION['user_type'])) {
 
 // Función para obtener todos los clientes
 function obtenerClientes($conn) {
-    $sql = "SELECT * FROM cliente";
+    $sql = "SELECT c.*, 
+                   (SELECT SUM(monto) FROM factura WHERE ID_Cliente = c.ID_Cliente) AS Factura,
+                   (SELECT estado FROM servicios WHERE ID_Cliente = c.ID_Cliente LIMIT 1) AS Estatus_Servicios,
+                   (c.Linea_Credito - COALESCE(SUM(f.monto), 0)) AS Saldo_Linea_Credito
+            FROM cliente c
+            LEFT JOIN factura f ON c.ID_Cliente = f.fk_id_Cliente
+            GROUP BY c.ID_Cliente";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+
+
 $clientes = obtenerClientes($conn);
+
 
 ?>
 
@@ -70,7 +79,11 @@ $clientes = obtenerClientes($conn);
                 }
             ?>
             <tr class="<?php echo $estado_class; ?>">
-                <td><?php echo $cliente['ID_Cliente']; ?></td>
+            <td>
+    <a href="#" data-bs-toggle="modal" data-bs-target="#infoClienteModal<?php echo $cliente['ID_Cliente']; ?>">
+        <?php echo $cliente['ID_Cliente']; ?>
+    </a>
+</td>
                 <td><?php echo htmlspecialchars($cliente['Nombre']); ?></td>
                 <td><?php echo htmlspecialchars($cliente['Direccion']); ?></td>
                 <td><?php echo htmlspecialchars($cliente['Tipo']); ?></td>
@@ -208,6 +221,46 @@ $clientes = obtenerClientes($conn);
             <?php endforeach; ?>
         </tbody>
     </table>
+    <!-- Modal Información del Cliente -->
+<div class="modal fade" id="infoClienteModal<?php echo $cliente['ID_Cliente']; ?>" tabindex="-1" aria-labelledby="infoClienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoClienteModalLabel">Información del Cliente: <?php echo $cliente['Nombre']; ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Dirección:</h6>
+                <p><?php echo htmlspecialchars($cliente['Direccion']); ?></p>
+                
+                <h6>Tipo:</h6>
+                <p><?php echo htmlspecialchars($cliente['Tipo']); ?></p>
+
+                <h6>Línea de Crédito:</h6>
+                <p><?php echo $cliente['Linea_Credito']; ?></p>
+
+                <h6>Saldo de la Línea de Crédito:</h6>
+                <p><?php echo $cliente['Saldo_Linea_Credito']; // Ajusta este campo según tus datos ?></p>
+
+                <h6>Estatus de Servicios:</h6>
+                <p><?php echo $cliente['Estatus_Servicios']; // Ajusta este campo según tus datos ?></p>
+
+                <h6>Facturas:</h6>
+                <p><?php echo $cliente['Factura']; // Ajusta este campo según tus datos ?></p>
+
+                <h6>Pago Contado:</h6>
+                <p><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></p>
+
+                <h6>Status:</h6>
+                <p><?php echo $cliente['Status']; ?></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
