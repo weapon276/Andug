@@ -1,31 +1,41 @@
 <?php
 session_start();
-include 'conexion.php';
+require 'conexion.php';
 
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-}
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['userId'])) {
     header("Location: login.php");
     exit();
 }
 
-// Verificar si la clave 'username' está definida en la sesión
-if (isset($_SESSION['username'])) {
-    $username = $_SESSION['username'];
-} else {
+$user_type_id = $_SESSION['userType'];
+$username = $_SESSION['username'];
+$usuario_id = $_SESSION['userId'];
 
-}
 
-$user_type = $_SESSION['user_type'];
-
-// Prevenir que el usuario vuelva a la página anterior después de cerrar sesión
+// Evitar que el usuario vuelva a la página anterior después de cerrar sesión
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+// Obtener el nombre del tipo de usuario
+$query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_type_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user_type = $result->fetch_assoc()['NombreTypeUser'];
+
+// Función para generar el menú
+function generateMenu($user_type_id, $conn) {
+    $menu = "<ul class='nav nav-pills flex-column mb-auto'>";
+    $query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $user_type_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user_type = $result->fetch_assoc()['NombreTypeUser'];
 
 // Función para generar el menú
 function generarMenu($user_type) {

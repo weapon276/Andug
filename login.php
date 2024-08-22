@@ -3,24 +3,34 @@ session_start();
 include 'conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = $_POST['username']; // Se unifica el nombre de la variable
+    $password = $_POST['nPass']; // Se unifica el nombre de la variable
 
-    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE username = :username");
-    $stmt->bindParam(':username', $username);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        // Consulta para obtener el usuario y tipo de usuario
+        $stmt = $conn->prepare("SELECT id, fk_typeuser, username, nPass FROM usuarios WHERE username = :username");
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_type'] = $user['user_type'];
-        $_SESSION['last_activity'] = time();
+        if ($user && password_verify($password, $user['nPass'])) {
+            // Verificar si ya hay una sesión activa
+            $stmt_session = $conn->prepare("SELECT session_id FROM sesion WHERE user_id = :userId");
+            $stmt_session->bindParam(':userId', $user['id']);
+            $stmt_session->execute();
+            $active_session = $stmt_session->fetch(PDO::FETCH_ASSOC);
+
         header("Location: index.php");
         exit();
     } else {
         $error = "Nombre de usuario o contraseña incorrectos";
     }
+} catch (PDOException $e) {
+    header("Location: error.php");
+    exit();
 }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -30,49 +40,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(rgba(50, 50, 50, 0.5), rgba(50, 50, 50, 0.5)), 
+                        url('fondo.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            color: #f4c0b2;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background-color: #285de2;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #e03c12;
+        }
+
+        .form-label {
+            color: #285de2;
+        }
+
+        .psw a {
+            color: #e03c12;
+        }
+
+        .psw a:hover {
+            color: #ee7755;
+        }
+    </style>
 </head>
-<style>
-    /* Ajustes generales para el body */
-    body {
-        font-family: 'Raleway', sans-serif;
-    }
-
-    /* Estilo para el contenedor principal */
-    .container {
-        max-width: 100%;
-        padding: 20px;
-    }
-
-    /* Estilo para la tarjeta de inicio de sesión */
-    .card {
-        border-radius: 10px;
-    }
-
-    /* Estilo para los botones */
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-    }
-
-    /* Estilo para el enlace de registro */
-    .psw a {
-        color: #007bff;
-    }
-
-    .psw a:hover {
-        text-decoration: underline;
-    }
-</style>
-<body class="bg-light">
+<body>
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card p-4 shadow-lg w-100" style="max-width: 400px;">
-            <h2 class="text-center mb-4">Iniciar Sesión</h2>
+            <h2 class="text-center mb-4" style="color: #e03c12;">Iniciar Sesión</h2>
             <?php if (isset($error)): ?>
                 <div class="alert alert-danger"><?php echo $error; ?></div>
             <?php endif; ?>
@@ -82,8 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="text" class="form-control" id="username" name="username" required>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <label for="nPass" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="nPass" name="nPass" required>
                 </div>
                 <div class="mb-3 text-center">
                     <button type="submit" class="btn btn-primary w-100">Ingresar</button>
