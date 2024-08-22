@@ -22,6 +22,19 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
     - Se creó la tabla `camion` en la base de datos con campos como `Placas`, `Peso`, `Unidad`, `Status`, y otros detalles específicos del camión.
     - Se añadieron triggers para actualizar automáticamente las fechas `fecha_inicio` y `fecha_final` en la tabla de camiones.
 
+### 2024-08-21
+### **Módulo de Registro de Usuarios**
+  - **Corrección en la inserción de usuarios:** Se corrigió un error en la inserción de nuevos usuarios en la base de datos que causaba un fallo por no reconocer la columna `vCorreo`. Ahora se ha asegurado que todos los campos necesarios se manejen correctamente en el proceso de registro.
+  - **Validación de tipo de usuario:** Se añadió una validación para que las notificaciones solo sean visibles para el tipo de usuario "Recursos Humanos" con `id_TypeUser = 3`. Esto incluye la creación de una columna `ID_TypeUser` en la tabla `mensajes` para gestionar esta funcionalidad.
+
+### **Módulo de Notificaciones**
+- **Filtrado de notificaciones por tipo de usuario:** Se implementó un mecanismo que permite que las notificaciones sobre nuevos registros de usuarios sean vistas únicamente por los usuarios del tipo "Recursos Humanos" (`id_TypeUser = 3`). Esta funcionalidad fue agregada para mejorar la seguridad y relevancia de las notificaciones en el sistema.
+
+### **Base de Datos**
+- **Ajuste en la tabla `mensajes`:** Se añadió la columna `ID_TypeUser` en la tabla `mensajes` para relacionar los mensajes con tipos de usuarios específicos. Esto permite que ciertos mensajes sean visibles solo para los usuarios correspondientes.
+- **Optimización de índices:** Se revisaron y optimizaron los índices en las tablas `mensajes` y `usuarios` para mejorar la velocidad de consulta y asegurar la integridad referencial.
+
+
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestión-de-flotas-andug.git`
 2. Configura la base de datos utilizando el archivo SQL proporcionado en `/database/`.

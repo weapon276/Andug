@@ -6,7 +6,7 @@ include 'index.php';
 // Iniciar la sesión
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }

@@ -2,7 +2,6 @@
 session_start();
 require 'conexion.php';
 
-
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userId'])) {
     header("Location: login.php");
@@ -13,29 +12,17 @@ $user_type_id = $_SESSION['userType'];
 $username = $_SESSION['username'];
 $usuario_id = $_SESSION['userId'];
 
-
 // Evitar que el usuario vuelva a la página anterior después de cerrar sesión
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
 // Obtener el nombre del tipo de usuario
-$query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = ?";
+$query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = :user_type_id";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $user_type_id);
+$stmt->bindParam(':user_type_id', $user_type_id, PDO::PARAM_INT);
 $stmt->execute();
-$result = $stmt->get_result();
-$user_type = $result->fetch_assoc()['NombreTypeUser'];
-
-// Función para generar el menú
-function generateMenu($user_type_id, $conn) {
-    $menu = "<ul class='nav nav-pills flex-column mb-auto'>";
-    $query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $user_type_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user_type = $result->fetch_assoc()['NombreTypeUser'];
+$user_type = $stmt->fetch(PDO::FETCH_ASSOC)['NombreTypeUser'];
 
 // Función para generar el menú
 function generarMenu($user_type) {
@@ -74,12 +61,15 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='cliente_viajes.php' class='nav-link'><i class='fas fa-search-location'></i> Consultar viajes</a></li>";
             $menu .= "<li class='nav-item'><a href='consultar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Consultar facturas</a></li>";
             break;
+        case 'Prospecto':
+            $menu .= "<li class='nav-item'><a href='cliente_viajes.php' class='nav-link'><i class='fas fa-search-location'></i> Consultar viajes</a></li>";
+            $menu .= "<li class='nav-item'><a href='consultar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Consultar facturas</a></li>";
+            break;
     }
     $menu .= "</ul>";
     return $menu;
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -164,7 +154,7 @@ function generarMenu($user_type) {
 
             function resetTimer() {
                 clearTimeout(time);
-                time = setTimeout(logout, 300000);
+                time = setTimeout(logout, 30000000);
             }
         };
 

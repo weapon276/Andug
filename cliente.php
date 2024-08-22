@@ -3,7 +3,7 @@ include 'conexion.php';
 include 'index.php';
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }
@@ -28,6 +28,52 @@ $clientes = obtenerClientes($conn);
 
 
 ?>
+<?php
+// Función para obtener todas las facturas de un cliente
+function obtenerFacturasCliente($conn, $id_cliente) {
+    $sql = "SELECT ID_Factura, Fecha, Monto, Total FROM factura WHERE fk_id_Cliente = :id_cliente";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id_cliente', $id_cliente);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+?>
+<?php
+include 'conexion.php';
+
+// Comprobar si se ha enviado una solicitud GET o POST
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
+    // Manejar la solicitud GET para obtener los datos de la factura
+    $id_factura = $_GET['id_factura'];
+
+    $sql = "SELECT * FROM factura WHERE ID_Factura = :id_factura";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':id_factura', $id_factura);
+    $stmt->execute();
+    $factura = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode($factura);
+
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_factura']) && isset($_POST['usuario_id'])) {
+    // Manejar la solicitud POST para registrar la descarga
+    $id_factura = $_POST['id_factura'];
+    $usuario_id = $_POST['usuario_id'];
+
+    $sql = "INSERT INTO log_movimientos (id_usuario, accion, detalle, fecha) VALUES (:id_usuario, 'Descarga de PDF', :detalle, NOW())";
+    $stmt = $conn->prepare($sql);
+    $detalle = 'Descargó el PDF de la factura ID ' . $id_factura;
+    $stmt->bindParam(':id_usuario', $usuario_id);
+    $stmt->bindParam(':detalle', $detalle);
+    $stmt->execute();
+
+    echo 'Registro de descarga exitoso.';
+} else {
+    echo 'Solicitud no válida.';
+}
+?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -39,6 +85,11 @@ $clientes = obtenerClientes($conn);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clientes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+
     <style>
         .table tr td {
             vertical-align: middle;
@@ -91,18 +142,24 @@ $clientes = obtenerClientes($conn);
                 <td><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></td>
                 <td><?php echo $cliente['Status']; ?></td>
                 <td>
-                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarClienteModal<?php echo $cliente['ID_Cliente']; ?>">
-                        <i class="bi bi-book"></i>
-                    </button>
-                    <form method="POST" action="suspender_cliente.php" style="display: inline;">
-                        <input type="hidden" name="id_cliente" value="<?php echo $cliente['ID_Cliente']; ?>">
-                        <button type="submit" class="btn btn-warning btn-sm">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        </button>
-                    </form>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#bajaClienteModal<?php echo $cliente['ID_Cliente']; ?>">
-                        <i class="bi bi-x-circle"></i>
-                    </button>
+   <!-- Botón Modificar Cliente -->
+            <!-- Botón Modificar Cliente -->
+            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarClienteModal<?php echo $cliente['ID_Cliente']; ?>" data-bs-toggle="tooltip" data-bs-placement="top" title="Modificar Cliente">
+                <i class="bi bi-pencil-fill"></i> <!-- Icono de lápiz para editar -->
+            </button>
+
+            <!-- Botón Suspender Cliente -->
+            <form method="POST" action="suspender_cliente.php" style="display: inline;">
+                <input type="hidden" name="id_cliente" value="<?php echo $cliente['ID_Cliente']; ?>">
+                <button type="submit" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Suspender Cliente">
+                    <i class="bi bi-pause-circle-fill"></i> <!-- Icono de pausa para suspender -->
+                </button>
+            </form>
+
+            <!-- Botón Dar de Baja Cliente -->
+            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#bajaClienteModal<?php echo $cliente['ID_Cliente']; ?>" data-bs-toggle="tooltip" data-bs-placement="top" title="Dar de Baja Cliente">
+                <i class="bi bi-x-circle-fill"></i> <!-- Icono de cruz para eliminar -->
+            </button>
                 </td>
             </tr>
 
@@ -221,15 +278,16 @@ $clientes = obtenerClientes($conn);
             <?php endforeach; ?>
         </tbody>
     </table>
-    <!-- Modal Información del Cliente -->
+<!-- Modal Información del Cliente -->
 <div class="modal fade" id="infoClienteModal<?php echo $cliente['ID_Cliente']; ?>" tabindex="-1" aria-labelledby="infoClienteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="infoClienteModalLabel">Información del Cliente: <?php echo $cliente['Nombre']; ?></h5>
+                <h5 class="modal-title" id="infoClienteModalLabel">Información del Cliente: <?php echo htmlspecialchars($cliente['Nombre']); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- Detalles del cliente -->
                 <h6>Dirección:</h6>
                 <p><?php echo htmlspecialchars($cliente['Direccion']); ?></p>
                 
@@ -237,22 +295,34 @@ $clientes = obtenerClientes($conn);
                 <p><?php echo htmlspecialchars($cliente['Tipo']); ?></p>
 
                 <h6>Línea de Crédito:</h6>
-                <p><?php echo $cliente['Linea_Credito']; ?></p>
+                <p><?php echo htmlspecialchars($cliente['Linea_Credito']); ?></p>
 
                 <h6>Saldo de la Línea de Crédito:</h6>
-                <p><?php echo $cliente['Saldo_Linea_Credito']; // Ajusta este campo según tus datos ?></p>
+                <p><?php echo htmlspecialchars($cliente['Saldo_Linea_Credito']); ?></p>
 
                 <h6>Estatus de Servicios:</h6>
-                <p><?php echo $cliente['Estatus_Servicios']; // Ajusta este campo según tus datos ?></p>
+                <p><?php echo htmlspecialchars($cliente['Estatus_Servicios']); ?></p>
 
                 <h6>Facturas:</h6>
-                <p><?php echo $cliente['Factura']; // Ajusta este campo según tus datos ?></p>
+                <?php
+                // Asumiendo que 'obtenerFacturasCliente' es una función que retorna un array de facturas
+                $facturas = obtenerFacturasCliente($conn, $cliente['ID_Cliente']);
+                if (!empty($facturas)) {
+                    echo '<ul id="factura-list">';
+                    foreach ($facturas as $factura) {
+                        echo '<li><a href="descargar_pdf.php?id_factura=' . $factura['ID_Factura'] . '&userId=' . $_SESSION['userId'] . '" target="_blank">Factura ID: ' . $factura['ID_Factura'] . ' - Fecha: ' . $factura['Fecha'] . ' - Total: $' . number_format($factura['Total'], 2) . '</a></li>';
+                    }
+                    echo '</ul>';
+                } else {
+                    echo '<p>No hay facturas disponibles para este cliente.</p>';
+                }
+                ?>
 
                 <h6>Pago Contado:</h6>
                 <p><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></p>
 
                 <h6>Status:</h6>
-                <p><?php echo $cliente['Status']; ?></p>
+                <p><?php echo htmlspecialchars($cliente['Status']); ?></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -260,6 +330,26 @@ $clientes = obtenerClientes($conn);
         </div>
     </div>
 </div>
+
+<!-- Modal de éxito -->
+<div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAlertaLabel">Alerta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAlertaBody">
+                <!-- El contenido de la alerta se inyectará aquí -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </div>
 

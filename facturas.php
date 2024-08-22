@@ -1,12 +1,16 @@
 <?php
 include 'conexion.php';
 include 'index.php';
+session_start(); // Asegúrate de iniciar la sesión
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['userType']) || !isset($_SESSION['userId'])) {
     header("Location: login.php");
     exit();
 }
+
+// Obtener el ID del usuario que está creando la factura
+$usuario_id = $_SESSION['userId'];
 
 // Función para obtener todas las cotizaciones
 function obtenerCotizaciones($conn) {
@@ -29,6 +33,10 @@ function obtenerClientes($conn) {
 $cotizaciones = obtenerCotizaciones($conn);
 $clientes = obtenerClientes($conn);
 
+// Inicializar variables para mensajes
+$mensaje = '';
+$tipo_alerta = '';
+
 // Manejar la solicitud de creación de factura
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_cotizacion = $_POST['cotizacion'];
@@ -39,9 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $monto = $_POST['monto'];
     $fecha = date('Y-m-d');
     $descripcion_productos = $_POST['descripcion_productos'];
-    
-    // Obtener el ID del usuario que está creando la factura
-    $id_empleado = $_SESSION['user_id'];
 
     // Calcular el total con el impuesto aplicado
     $total = $monto + ($monto * $impuesto / 100);
@@ -62,7 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $nuevo_credito = 0;
             $diferencia = $total - $credito_disponible;
-            echo "El crédito disponible es insuficiente. El resto ($diferencia) se cubrirá con otro tipo de pago.";
+            $mensaje = "El crédito disponible es insuficiente. El resto ($diferencia) se cubrirá con otro tipo de pago.";
+            $tipo_alerta = 'warning';
         }
 
         // Actualizar la línea de crédito del cliente
@@ -75,11 +81,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Insertar la factura en la base de datos
     $sql = "INSERT INTO factura (ID_Cotizacion, fk_id_Cliente, fk_idEmpleado, Fecha, Monto, Impuesto, Total, Tipo_Cliente, Tipo_Pago, Descripcion_Productos) 
-            VALUES (:id_cotizacion, :id_cliente, :id_empleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos)";
+            VALUES (:id_cotizacion, :id_cliente, :fk_idEmpleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos)";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id_cotizacion', $id_cotizacion);
     $stmt->bindParam(':id_cliente', $id_cliente);
-    $stmt->bindParam(':id_empleado', $id_empleado);
+    $stmt->bindParam(':fk_idEmpleado', $usuario_id);
     $stmt->bindParam(':fecha', $fecha);
     $stmt->bindParam(':monto', $monto);
     $stmt->bindParam(':impuesto', $impuesto);
@@ -87,25 +93,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindParam(':tipo_cliente', $tipo_cliente);
     $stmt->bindParam(':tipo_pago', $tipo_pago);
     $stmt->bindParam(':descripcion_productos', $descripcion_productos);
-    $stmt->execute();
 
-    header("Location: facturas.php");
-    exit();
+    try {
+        $stmt->execute();
+        
+        // Registrar el movimiento en la tabla de log
+        $descripcion_log = "Factura creada para Cliente ID: $id_cliente con Cotización ID: $id_cotizacion. Total: $total.";
+        $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:userId, 'Creación de Factura', :descripcion)";
+        $stmt_log = $conn->prepare($sql_log);
+        $stmt_log->bindParam(':userId', $usuario_id);
+        $stmt_log->bindParam(':descripcion', $descripcion_log);
+        $stmt_log->execute();
+        
+        $mensaje = 'Factura creada exitosamente.';
+        $tipo_alerta = 'success';
+    } catch (PDOException $e) {
+        // Manejar el error de la base de datos
+        $mensaje = "Error: " . $e->getMessage();
+        $tipo_alerta = 'error';
+    }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Generar Factura</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<!-- Margen de tabla y menu lateral -->
-<div class="w3-main" style="margin-left:320px;margin-top:60px;">
+  <!-- Margen de tabla y menu lateral -->
+  <div class="w3-main" style="margin-left:320px;margin-top:60px;">
 <!--Fin de margen -->
 <body>
 <div class="container mt-5">
     <h1>Generar Factura</h1>
+
+    <?php if ($mensaje): ?>
+        <div class="alert alert-<?php echo $tipo_alerta; ?> alert-dismissible fade show" role="alert">
+            <?php echo htmlspecialchars($mensaje); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <form method="POST" action="facturas.php">
         <div class="mb-3">
             <label for="cotizacion" class="form-label">Cotización</label>

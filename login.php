@@ -1,10 +1,10 @@
 <?php
 session_start();
-include 'conexion.php';
+require 'conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username']; // Se unifica el nombre de la variable
-    $password = $_POST['nPass']; // Se unifica el nombre de la variable
+    $username = $_POST['username'];
+    $nPass = $_POST['nPass'];
 
     try {
         // Consulta para obtener el usuario y tipo de usuario
@@ -13,25 +13,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['nPass'])) {
+        // Verificar si el usuario existe y si la contraseña es correcta
+        if ($user && password_verify($nPass, $user['nPass'])) {
             // Verificar si ya hay una sesión activa
             $stmt_session = $conn->prepare("SELECT session_id FROM sesion WHERE user_id = :userId");
             $stmt_session->bindParam(':userId', $user['id']);
             $stmt_session->execute();
             $active_session = $stmt_session->fetch(PDO::FETCH_ASSOC);
 
-        header("Location: index.php");
-        exit();
-    } else {
-        $error = "Nombre de usuario o contraseña incorrectos";
-    }
-} catch (PDOException $e) {
-    header("Location: error.php");
-    exit();
-}
-}
+            if ($active_session) {
+                $error = "Ya tienes una sesión activa. Cierra la sesión en el otro dispositivo antes de iniciar una nueva.";
+            } else {
+               
 
+                // Establecer las variables de sesión
+                $_SESSION['userId'] = $user['id'];
+                $_SESSION['username'] = $user['vCorreo'];
+                $_SESSION['userType'] = $user['fk_typeuser'];
+
+                // Redirigir al dashboard según el tipo de usuario
+                if ($user['fk_typeuser'] == 4) {
+                    header("Location: index.php");
+                } elseif ($user['fk_typeuser'] == 3) {
+                    header("Location: index.php");
+                } else {
+                    header("Location: index.php");
+                }
+                exit();
+            }
+        } else {
+            $error = "Correo o contraseña incorrectos";
+        }
+    } catch (PDOException $e) {
+        $error = "Error en la base de datos: " . $e->getMessage();
+    }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -78,16 +96,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card p-4 shadow-lg w-100" style="max-width: 400px;">
-            <h2 class="text-center mb-4" style="color: #e03c12;">Iniciar Sesión</h2>
+            <h2 class="text-center mb-4">Iniciar Sesión</h2>
             <?php if (isset($error)): ?>
                 <div class="alert alert-danger"><?php echo $error; ?></div>
             <?php endif; ?>
             <form method="POST" action="login.php">
                 <div class="mb-3">
                     <label for="username" class="form-label">Correo Electrónico</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
+                    <input type="texto" class="form-control" id="username" name="username" required>
                 </div>
                 <div class="mb-3">
                     <label for="nPass" class="form-label">Contraseña</label>

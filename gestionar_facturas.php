@@ -3,7 +3,7 @@ include 'conexion.php';
 include 'index.php';
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }
