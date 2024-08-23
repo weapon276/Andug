@@ -52,68 +52,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total = $monto + ($monto * $impuesto / 100);
 
     // Obtener la línea de crédito del cliente
-    $sql_credito = "SELECT Linea_Credito FROM cliente WHERE ID_Cliente = :id_cliente";
+    $sql_credito = "SELECT Linea_Credito, Nombre FROM cliente WHERE ID_Cliente = :id_cliente";
     $stmt_credito = $conn->prepare($sql_credito);
     $stmt_credito->bindParam(':id_cliente', $id_cliente);
     $stmt_credito->execute();
     $cliente = $stmt_credito->fetch(PDO::FETCH_ASSOC);
 
-    $credito_disponible = $cliente['Linea_Credito'];
+    // Verificar si el cliente existe y tiene una línea de crédito válida
+    if ($cliente && isset($cliente['Linea_Credito'])) {
+        $credito_disponible = $cliente['Linea_Credito'];
+        $nombre_cliente = $cliente['Nombre'];
 
-    // Verificar y descontar la línea de crédito
-    if ($tipo_pago == 'linea_credito') {
-        if ($credito_disponible >= $total) {
-            $nuevo_credito = $credito_disponible - $total;
-        } else {
-            $nuevo_credito = 0;
-            $diferencia = $total - $credito_disponible;
-            $mensaje = "El crédito disponible es insuficiente. El resto ($diferencia) se cubrirá con otro tipo de pago.";
-            $tipo_alerta = 'warning';
+        // Verificar y descontar la línea de crédito
+        if ($tipo_pago == 'linea_credito') {
+            if ($credito_disponible >= $total) {
+                $nuevo_credito = $credito_disponible - $total;
+            } else {
+                $nuevo_credito = 0;
+                $diferencia = $total - $credito_disponible;
+                $mensaje = "El crédito disponible es insuficiente. El resto ($diferencia) se cubrirá con otro tipo de pago.";
+                $tipo_alerta = 'warning';
+            }
+
+            // Actualizar la línea de crédito del cliente
+            $sql_update_credito = "UPDATE cliente SET Linea_Credito = :nuevo_credito WHERE ID_Cliente = :id_cliente";
+            $stmt_update_credito = $conn->prepare($sql_update_credito);
+            $stmt_update_credito->bindParam(':nuevo_credito', $nuevo_credito);
+            $stmt_update_credito->bindParam(':id_cliente', $id_cliente);
+            $stmt_update_credito->execute();
         }
 
-        // Actualizar la línea de crédito del cliente
-        $sql_update_credito = "UPDATE cliente SET Linea_Credito = :nuevo_credito WHERE ID_Cliente = :id_cliente";
-        $stmt_update_credito = $conn->prepare($sql_update_credito);
-        $stmt_update_credito->bindParam(':nuevo_credito', $nuevo_credito);
-        $stmt_update_credito->bindParam(':id_cliente', $id_cliente);
-        $stmt_update_credito->execute();
-    }
+        // Insertar la factura en la base de datos
+        $sql = "INSERT INTO factura (ID_Cotizacion, fk_id_Cliente, fk_idEmpleado, Fecha, Monto, Impuesto, Total, Tipo_Cliente, Tipo_Pago, Descripcion_Productos) 
+                VALUES (:id_cotizacion, :id_cliente, :fk_idEmpleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':id_cotizacion', $id_cotizacion);
+        $stmt->bindParam(':id_cliente', $id_cliente);
+        $stmt->bindParam(':fk_idEmpleado', $usuario_id);
+        $stmt->bindParam(':fecha', $fecha);
+        $stmt->bindParam(':monto', $monto);
+        $stmt->bindParam(':impuesto', $impuesto);
+        $stmt->bindParam(':total', $total);
+        $stmt->bindParam(':tipo_cliente', $tipo_cliente);
+        $stmt->bindParam(':tipo_pago', $tipo_pago);
+        $stmt->bindParam(':descripcion_productos', $descripcion_productos);
 
-    // Insertar la factura en la base de datos
-    $sql = "INSERT INTO factura (ID_Cotizacion, fk_id_Cliente, fk_idEmpleado, Fecha, Monto, Impuesto, Total, Tipo_Cliente, Tipo_Pago, Descripcion_Productos) 
-            VALUES (:id_cotizacion, :id_cliente, :fk_idEmpleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':id_cotizacion', $id_cotizacion);
-    $stmt->bindParam(':id_cliente', $id_cliente);
-    $stmt->bindParam(':fk_idEmpleado', $usuario_id);
-    $stmt->bindParam(':fecha', $fecha);
-    $stmt->bindParam(':monto', $monto);
-    $stmt->bindParam(':impuesto', $impuesto);
-    $stmt->bindParam(':total', $total);
-    $stmt->bindParam(':tipo_cliente', $tipo_cliente);
-    $stmt->bindParam(':tipo_pago', $tipo_pago);
-    $stmt->bindParam(':descripcion_productos', $descripcion_productos);
+        try {
+            $stmt->execute();
+            
+            // Obtener el ID de la factura recién creada
+            $id_factura = $conn->lastInsertId();
+            
+            // Registrar el movimiento en la tabla de log
+            $descripcion_log = "Factura creada para Cliente ID: $id_cliente con Cotización ID: $id_cotizacion. Total: $total.";
+            $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:userId, 'Creación de Factura', :descripcion)";
+            $stmt_log = $conn->prepare($sql_log);
+            $stmt_log->bindParam(':userId', $usuario_id);
+            $stmt_log->bindParam(':descripcion', $descripcion_log);
+            $stmt_log->execute();
 
-    try {
-        $stmt->execute();
-        
-        // Registrar el movimiento en la tabla de log
-        $descripcion_log = "Factura creada para Cliente ID: $id_cliente con Cotización ID: $id_cotizacion. Total: $total.";
-        $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:userId, 'Creación de Factura', :descripcion)";
-        $stmt_log = $conn->prepare($sql_log);
-        $stmt_log->bindParam(':userId', $usuario_id);
-        $stmt_log->bindParam(':descripcion', $descripcion_log);
-        $stmt_log->execute();
-        
-        $mensaje = 'Factura creada exitosamente.';
-        $tipo_alerta = 'success';
-    } catch (PDOException $e) {
-        // Manejar el error de la base de datos
-        $mensaje = "Error: " . $e->getMessage();
+            // Insertar un mensaje en la tabla mensajes
+            $mensaje_texto = "Se ha creado la factura ID: $id_factura para el cliente ID: $id_cliente con el nombre '$nombre_cliente' en la fecha $fecha.";
+            $tipo_mensaje = 'Facturas';
+            $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
+            $stmt_mensaje = $conn->prepare($sql_mensaje);
+            $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
+            $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
+            $stmt_mensaje->bindParam(':fecha', $fecha);
+            $stmt_mensaje->execute();
+            
+            $mensaje = 'Factura creada exitosamente.';
+            $tipo_alerta = 'success';
+        } catch (PDOException $e) {
+            // Manejar el error de la base de datos
+            $mensaje = "Error: " . $e->getMessage();
+            $tipo_alerta = 'error';
+        }
+    } else {
+        // Manejar el caso en que el cliente no existe o no se puede obtener la línea de crédito
+        $mensaje = 'Error: Cliente no encontrado o no tiene línea de crédito.';
         $tipo_alerta = 'error';
     }
 }
 ?>
+
+
 <!DOCTYPE html>
 <html>
 <head>

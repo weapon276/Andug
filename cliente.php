@@ -31,7 +31,7 @@ $clientes = obtenerClientes($conn);
 <?php
 // Función para obtener todas las facturas de un cliente
 function obtenerFacturasCliente($conn, $id_cliente) {
-    $sql = "SELECT ID_Factura, Fecha, Monto, Total FROM factura WHERE fk_id_Cliente = :id_cliente";
+    $sql = "SELECT ID_Factura, Fecha, Monto, Estado_Pago, Total FROM factura WHERE fk_id_Cliente = :id_cliente";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id_cliente', $id_cliente);
     $stmt->execute();
@@ -305,18 +305,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
 
                 <h6>Facturas:</h6>
                 <?php
-                // Asumiendo que 'obtenerFacturasCliente' es una función que retorna un array de facturas
                 $facturas = obtenerFacturasCliente($conn, $cliente['ID_Cliente']);
+
                 if (!empty($facturas)) {
-                    echo '<ul id="factura-list">';
+                    // Inicializar arreglos para facturas pagadas y no pagadas/prorroga
+                    $facturas_pagadas = [];
+                    $facturas_no_pagadas = [];
+
+                    // Clasificar facturas en pagadas y no pagadas/prorroga
                     foreach ($facturas as $factura) {
-                        echo '<li><a href="descargar_pdf.php?id_factura=' . $factura['ID_Factura'] . '&userId=' . $_SESSION['userId'] . '" target="_blank">Factura ID: ' . $factura['ID_Factura'] . ' - Fecha: ' . $factura['Fecha'] . ' - Total: $' . number_format($factura['Total'], 2) . '</a></li>';
+                        if ($factura['Estado_Pago'] == 'Pagado') {
+                            $facturas_pagadas[] = $factura;
+                        } else {
+                            $facturas_no_pagadas[] = $factura;
+                        }
                     }
-                    echo '</ul>';
+
+                    // Mostrar facturas pagadas
+                    echo '<div style="display: inline-block; width: 45%; vertical-align: top;">';
+                    echo '<h3>Facturas Pagadas</h3>';
+                    if (!empty($facturas_pagadas)) {
+                        echo '<ul id="factura-pagada-list">';
+                        foreach ($facturas_pagadas as $factura) {
+                            echo '<li><a href="descargar_pdf.php?id_factura=' . $factura['ID_Factura'] . '&userId=' . $_SESSION['userId'] . '" target="_blank">Factura ID: ' . $factura['ID_Factura'] . ' - Fecha: ' . $factura['Fecha'] . ' - Total: $' . number_format($factura['Total'], 2) . '</a></li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<p>No hay facturas pagadas para este cliente.</p>';
+                    }
+                    echo '</div>';
+
+                    // Mostrar facturas no pagadas o prorroga
+                    echo '<div style="display: inline-block; width: 45%; vertical-align: top;">';
+                    echo '<h3>Facturas No Pagadas o en Prórroga</h3>';
+                    if (!empty($facturas_no_pagadas)) {
+                        echo '<ul id="factura-no-pagada-list">';
+                        foreach ($facturas_no_pagadas as $factura) {
+                            echo '<li><a href="descargar_pdf.php?id_factura=' . $factura['ID_Factura'] . '&userId=' . $_SESSION['userId'] . '" target="_blank">Factura ID: ' . $factura['ID_Factura'] . ' - Fecha: ' . $factura['Fecha'] . ' - Total: $' . number_format($factura['Total'], 2) . '</a></li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<p>No hay facturas no pagadas o en prórroga para este cliente.</p>';
+                    }
+                    echo '</div>';
                 } else {
                     echo '<p>No hay facturas disponibles para este cliente.</p>';
                 }
                 ?>
+
 
                 <h6>Pago Contado:</h6>
                 <p><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></p>

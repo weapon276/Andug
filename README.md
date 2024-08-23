@@ -34,6 +34,18 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
 - **Ajuste en la tabla `mensajes`:** Se añadió la columna `ID_TypeUser` en la tabla `mensajes` para relacionar los mensajes con tipos de usuarios específicos. Esto permite que ciertos mensajes sean visibles solo para los usuarios correspondientes.
 - **Optimización de índices:** Se revisaron y optimizaron los índices en las tablas `mensajes` y `usuarios` para mejorar la velocidad de consulta y asegurar la integridad referencial.
 
+### 2024-08-22
+- **Módulo de Facturación**
+  - **Corrección en el código:**
+    - Se corrigió un error en la función que genera mensajes para la base de datos, específicamente en la línea de código que accede al nombre del cliente.
+    - Se ajustó el manejo de errores y se resolvió el problema de intento de acceso a un índice nulo en el array.
+    - Se actualizó el proceso de inserción de facturas para incluir la lógica correcta de descuento y actualización de crédito.
+    - Se solucionaron errores en la creación de mensajes para la tabla `mensajes`, asegurando que se manejen correctamente los datos y se prevengan fallos de integridad referencial.
+    - Se mejoró el archivo de configuración para manejar correctamente la base de datos y las actualizaciones de datos.
+
+### 2024-08-22
+- **Módulo de Diseño de Factura**
+  - **Mejora del diseño del PDF de factura:** Se mejoró el diseño del PDF para las facturas, incluyendo la incorporación del logo de la empresa y una estructura más profesional para la presentación de la información.
 
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestión-de-flotas-andug.git`
