@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
                // Insertar un mensaje en la tabla mensajes
-               $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fecha.";
+               $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fechaa.";
                $tipo_mensaje = 'Cotizacion';
                $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
                $stmt_mensaje = $conn->prepare($sql_mensaje);

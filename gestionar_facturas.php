@@ -86,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_estado'])) {
 <head>
     <title>Gestionar Facturas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .table tr td {
@@ -155,23 +157,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_estado'])) {
                 <td><?php echo $factura['Estado_Pago']; ?></td>
                 <td><?php echo $factura['fecha_final']; ?></td>
                 <td>
-                    <!-- Botón de Pago -->
-                    <form method="POST" action="gestionar_facturas.php" style="display: inline;">
-                        <input type="hidden" name="id_factura" value="<?php echo $factura['ID_Factura']; ?>">
-                        <input type="hidden" name="nuevo_estado" value="Pagado">
-                        <button type="submit" name="update_estado" class="btn btn-success btn-sm">
-                            <i class="bi bi-check-circle"></i>
-                        </button>
-                    </form>
-                    <!-- Botón de Prorroga -->
-                    <button type="button" class="btn btn-warning btn-sm" onclick="abrirModalProrroga('<?php echo $factura['ID_Factura']; ?>')">
-                        <i class="bi bi-clock-fill"></i>
-                    </button>
-                    <!-- Botón de Cancelar -->
-                    <button type="button" class="btn btn-danger btn-sm" onclick="abrirModalCancelar('<?php echo $factura['ID_Factura']; ?>')">
-                        <i class="bi bi-x-circle"></i>
-                    </button>
-                </td>
+   <!-- Botón de Pago -->
+<form method="POST" action="gestionar_facturas.php" style="display: inline;">
+    <input type="hidden" name="id_factura" value="<?php echo $factura['ID_Factura']; ?>">
+    <input type="hidden" name="nuevo_estado" value="Pagado">
+    <button type="submit" name="update_estado" class="btn btn-success btn-sm" title="Marcar como Pagado">
+        <i class="bi bi-credit-card"></i> <!-- Icono de tarjeta de crédito para representar el pago -->
+    </button>
+</form>
+
+<!-- Botón de Prórroga -->
+<button type="button" class="btn btn-warning btn-sm" onclick="abrirModalProrroga('<?php echo $factura['ID_Factura']; ?>')" title="Solicitar Prórroga">
+    <i class="bi bi-calendar-plus"></i> <!-- Icono de calendario con un símbolo de más para representar la prórroga -->
+</button>
+
+<!-- Botón de Cancelar -->
+<button type="button" class="btn btn-danger btn-sm" onclick="abrirModalCancelar('<?php echo $factura['ID_Factura']; ?>')" title="Cancelar Factura">
+    <i class="bi bi-x-circle"></i> <!-- Icono de círculo con una cruz para representar la cancelación -->
+</button>
+
+<!-- Botón de Descargar PDF -->
+<a href="descargar_pdf.php?id_factura=<?php echo $factura['ID_Factura']; ?>" class="btn btn-info btn-sm" title="Descargar PDF">
+    <i class="bi bi-file-earmark-pdf"></i> <!-- Icono de archivo PDF para representar la descarga del PDF -->
+</a>
+
+
             </tr>
             <?php endforeach; ?>
         </tbody>
