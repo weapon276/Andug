@@ -4,21 +4,21 @@ include 'index.php';
 session_start();
 
 // Verificar si el usuario está autenticado y tiene el tipo adecuado
-if (!isset($_SESSION['user_type']) || !in_array($_SESSION['user_type'], ['Administrador', 'Contabilidad'])) {
+if (!isset($_SESSION['userType']) || !in_array($_SESSION['userType'], ['Administrador', 'Contabilidad'])) {
     $mensaje = 'Por el momento no cuentas con mensajes.';
     $mostrarMensaje = true;
 } else {
-    $user_id = $_SESSION['user_id'];
+    $user_id = $_SESSION['userId'];
 
     // Función para obtener las notificaciones del usuario
     function obtenerNotificaciones($conn, $user_id) {
         $sql = "SELECT m.ID_Mensaje, m.Mensaje, m.Fecha_Envio, c.Nombre AS Cliente
                 FROM mensajes m
                 JOIN cliente c ON m.ID_Cliente = c.ID_Cliente
-                WHERE m.ID_Destinatario = :user_id
+                WHERE m.ID_Destinatario = :userId
                 ORDER BY m.Fecha_Envio DESC";
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':userId', $user_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

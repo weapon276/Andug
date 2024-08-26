@@ -2,7 +2,6 @@
 include 'conexion.php';
 include 'index.php';
 
-
 // Iniciar la sesión
 
 // Verificar si el usuario está autenticado
@@ -10,6 +9,8 @@ if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }
+// Obtener el ID del usuario que está creando la factura
+$usuario_id = $_SESSION['userId'];
 
 // Función para obtener clientes
 function obtenerClientes($conn) {
@@ -44,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener datos del formulario
     $id_cliente = $_POST['cliente'];
     $id_empleado = $_POST['empleado'];
-    $Nombreempleado = $_POST['Nombre'];
     $descripcion = $_POST['descripcion'];
     $monto = $_POST['monto'];
     $fecha = $_POST['fecha'];
@@ -74,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id_cliente', $id_cliente);
     $stmt->bindParam(':id_empleado', $id_empleado);
-    $stmt->bindParam(':Nombre', $Nombreempleado);
     $stmt->bindParam(':descripcion', $descripcion);
     $stmt->bindParam(':monto', $monto);
     $stmt->bindParam(':fecha', $fecha);
@@ -112,35 +111,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_update_camion->execute();
     }
 
-    // Insertar detalles de servicio
+               // Insertar un mensaje en la tabla mensajes
+               $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fecha.";
+               $tipo_mensaje = 'Cotizacion';
+               $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
+               $stmt_mensaje = $conn->prepare($sql_mensaje);
+               $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
+               $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
+               $stmt_mensaje->bindParam(':fecha', $fecha);
+               $stmt_mensaje->execute();
 
-    foreach ($rutas as $index => $ruta) {
-        $detalle = $detalles[$index];
-        $sql_detalle = "INSERT INTO detalles_cotizacion (ID_Cotizacion, Ruta, Detalle) VALUES (:id_cotizacion, :ruta, :detalle)";
-        $stmt_detalle = $conn->prepare($sql_detalle);
-        $stmt_detalle->bindParam(':id_cotizacion', $id_cotizacion);
-        $stmt_detalle->bindParam(':ruta', $ruta);
-        $stmt_detalle->bindParam(':detalle', $detalle);
-        $stmt_detalle->execute();
-    }
-
-    // Enviar notificación a usuarios con tipo "administrador" y "contabilidad"
-    $sql_notificar = "INSERT INTO mensajes (ID_Cliente, Tipo_Mensaje, Mensaje, ID_Destinatario) 
-                      SELECT :id_cliente, 'General', CONCAT('Nueva cotización creada por el empleado ', :Nombre, ' para el cliente ', (SELECT Nombre FROM cliente WHERE ID_Cliente = :id_cliente), ' con fecha y hora ', NOW()), id
-                      FROM usuarios
-                      WHERE user_type IN ('administrador', 'contabilidad')";
-
-    $stmt_notificar = $conn->prepare($sql_notificar);
-    $stmt_notificar->bindParam(':id_cliente', $id_cliente);
-    $stmt_notificar->bindParam(':Nombre', $Nombreempleado);
-    $stmt_notificar->execute();
-
-    // Configurar una variable de sesión para indicar que se ha creado una notificación
-    $_SESSION['notification'] = 'Nueva cotización realizada';
-    header('Location: gestionar_cotizacion.php'); // Redirigir para evitar el reenvío del formulario
-    exit();
-}
+    // Insertar en la tabla log_movimientos
+    $descripcion_log = "Cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion'.";
+    $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:user_id, 'Creación de Cotización', :descripcion_log)";
+    $stmt_log = $conn->prepare($sql_log);
+    $stmt_log->bindParam(':user_id', $usuario_id); // Suponiendo que el empleado que crea la cotización es quien realiza la acción
+    $stmt_log->bindParam(':descripcion_log', $descripcion_log);
+    $stmt_log->execute();
+          
+} 
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -212,11 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mb-3">
             <label for="horario_carga" class="form-label">Horario de Carga</label>
-            <input type="text" class="form-control" id="horario_carga" name="horario_carga" required>
+            <input type="time" class="form-control" id="horario_carga" name="horario_carga" required>
         </div>
         <div class="mb-3">
             <label for="horario_descarga" class="form-label">Horario de Descarga</label>
-            <input type="text" class="form-control" id="horario_descarga" name="horario_descarga" required>
+            <input type="time" class="form-control" id="horario_descarga" name="horario_descarga" required>
         </div>
         <div class="mb-3">
             <label for="tipo_mercancia" class="form-label">Tipo de Mercancía</label>

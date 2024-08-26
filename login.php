@@ -60,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(rgba(50, 50, 50, 0.5), rgba(50, 50, 50, 0.5)), 
-                        url('fondo.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(90, 90, 90, 0.9), rgba(50, 50, 50, 0.5)), 
+                        url('img/andug.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Arial', sans-serif;
             color: #f4c0b2;

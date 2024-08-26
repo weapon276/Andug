@@ -83,19 +83,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insertar la factura en la base de datos
-        $sql = "INSERT INTO factura (ID_Cotizacion, fk_id_Cliente, fk_idEmpleado, Fecha, Monto, Impuesto, Total, Tipo_Cliente, Tipo_Pago, Descripcion_Productos) 
-                VALUES (:id_cotizacion, :id_cliente, :fk_idEmpleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':id_cotizacion', $id_cotizacion);
-        $stmt->bindParam(':id_cliente', $id_cliente);
-        $stmt->bindParam(':fk_idEmpleado', $usuario_id);
-        $stmt->bindParam(':fecha', $fecha);
-        $stmt->bindParam(':monto', $monto);
-        $stmt->bindParam(':impuesto', $impuesto);
-        $stmt->bindParam(':total', $total);
-        $stmt->bindParam(':tipo_cliente', $tipo_cliente);
-        $stmt->bindParam(':tipo_pago', $tipo_pago);
-        $stmt->bindParam(':descripcion_productos', $descripcion_productos);
+        $sql = "INSERT INTO factura (ID_Cotizacion, fk_id_Cliente, fk_idEmpleado, Fecha, Monto, Impuesto, Total, Tipo_Cliente, Tipo_Pago, Descripcion_Productos, Estado_Pago) 
+        VALUES (:id_cotizacion, :id_cliente, :fk_idEmpleado, :fecha, :monto, :impuesto, :total, :tipo_cliente, :tipo_pago, :descripcion_productos, :estado_pago)";
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':id_cotizacion', $id_cotizacion);
+$stmt->bindParam(':id_cliente', $id_cliente);
+$stmt->bindParam(':fk_idEmpleado', $usuario_id);
+$stmt->bindParam(':fecha', $fecha);
+$stmt->bindParam(':monto', $monto);
+$stmt->bindParam(':impuesto', $impuesto);
+$stmt->bindParam(':total', $total);
+$stmt->bindParam(':tipo_cliente', $tipo_cliente);
+$stmt->bindParam(':tipo_pago', $tipo_pago);
+$stmt->bindParam(':descripcion_productos', $descripcion_productos);
+
+// Añadir el nuevo parámetro para el estado de pago
+$estado_pago = 'Pendiente de pago';
+$stmt->bindParam(':estado_pago', $estado_pago);
 
         try {
             $stmt->execute();
