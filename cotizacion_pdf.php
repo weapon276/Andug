@@ -63,8 +63,8 @@ $pdf->Ln(5);
 
 // Información de la cotización en tabla
 $pdf->SetFont('Arial', 'B', 12);
-$pdf->Cell(40, 10, 'ID Cotización', 1);
-$pdf->Cell(60, 10, 'Descripción', 1);
+$pdf->Cell(40, 10, 'ID Cotizacion', 1);
+$pdf->Cell(60, 10, 'Descripcion', 1);
 $pdf->Cell(30, 10, 'Monto', 1);
 $pdf->Cell(30, 10, 'Fecha', 1);
 $pdf->Cell(30, 10, 'Vigencia', 1);
@@ -82,15 +82,13 @@ $pdf->Ln();
 $pdf->Cell(40, 10, 'Punto de Origen', 1);
 $pdf->Cell(60, 10, 'Punto de Destino', 1);
 $pdf->Cell(30, 10, 'Fecha de Traslado', 1);
-$pdf->Cell(30, 10, 'Horario de Carga', 1);
-$pdf->Cell(30, 10, 'Horario de Descarga', 1);
+
 $pdf->Ln();
 
 $pdf->Cell(40, 10, $cotizacion['PuntoA_Origen'], 1);
 $pdf->Cell(60, 10, $cotizacion['PuntoB_Destino'], 1);
 $pdf->Cell(30, 10, $cotizacion['Fecha_Traslado'], 1);
-$pdf->Cell(30, 10, $cotizacion['Horario_Carga'], 1);
-$pdf->Cell(30, 10, $cotizacion['Horario_Descarga'], 1);
+
 $pdf->Ln();
 
 // Crear una nueva página para las cláusulas

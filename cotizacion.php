@@ -3,12 +3,14 @@ include 'conexion.php';
 include 'index.php';
 
 // Iniciar la sesión
+session_start();
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }
+
 // Obtener el ID del usuario que está creando la factura
 $usuario_id = $_SESSION['userId'];
 
@@ -36,6 +38,32 @@ function obtenerCamionesLibres($conn) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $municipioDestino) {
+    try {
+        $sql = "SELECT ID_Ruta, Estado_Origen, Municipio_Origen, Estado_Destino, Municipio_Destino, Km 
+                FROM rutas 
+                WHERE Estado_Origen = :estadoOrigen 
+                AND Municipio_Origen = :municipioOrigen 
+                AND Estado_Destino = :estadoDestino 
+                AND Municipio_Destino = :municipioDestino
+                AND Estatus = 'Disponible'";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':estadoOrigen', $estadoOrigen);
+        $stmt->bindParam(':municipioOrigen', $municipioOrigen);
+        $stmt->bindParam(':estadoDestino', $estadoDestino);
+        $stmt->bindParam(':municipioDestino', $municipioDestino);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo 'Error: ' . $e->getMessage();
+        return [];
+    }
+}
+
+
+
+
+
 $clientes = obtenerClientes($conn);
 $empleados = obtenerEmpleados($conn);
 $camiones_libres = obtenerCamionesLibres($conn);
@@ -62,15 +90,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $capacidad_camiones = $_POST['capacidad_camiones'];
     $dias_credito = $_POST['dias_credito'];
     $peso = $_POST['peso'];
+    $id_ruta = $_POST['ruta']; // Ruta seleccionada
 
     // Validar Tipo_Camiones
     $tipo_camiones = isset($_POST['tipo_camiones']) && !empty($_POST['tipo_camiones']) ? $_POST['tipo_camiones'] : 'DefaultType';
 
     // Insertar la cotización
     $sql = "INSERT INTO cotizacion 
-            (ID_Cliente, fk_idEmpleado, Descripcion, Monto, Fecha, Vigencia, PuntoA_Origen, PuntoB_Destino, Fecha_Traslado, Horario_Carga, Horario_Descarga, Tipo_Mercancia, Condiciones_Mercancia, Servicio_Adicional, Tipo_Camiones, Numero_Camiones, Capacidad_Camiones, fecha_inicio, fecha_final) 
+            (ID_Cliente, fk_idEmpleado, Descripcion, Monto, Fecha, Vigencia, PuntoA_Origen, PuntoB_Destino, Fecha_Traslado, Horario_Carga, Horario_Descarga, Tipo_Mercancia, Condiciones_Mercancia, Servicio_Adicional, Tipo_Camiones, Numero_Camiones, Capacidad_Camiones, Fk_IdRutas, fecha_inicio, fecha_final) 
             VALUES 
-            (:id_cliente, :id_empleado, :descripcion, :monto, :fecha, :vigencia, :puntoA_origen, :puntoB_destino, :fecha_traslado, :horario_carga, :horario_descarga, :tipo_mercancia, :condiciones_mercancia, :servicio_adicional, :tipo_camiones, :numero_camiones, :capacidad_camiones, NOW(), NOW())";
+            (:id_cliente, :id_empleado, :descripcion, :monto, :fecha, :vigencia, :puntoA_origen, :puntoB_destino, :fecha_traslado, :horario_carga, :horario_descarga, :tipo_mercancia, :condiciones_mercancia, :servicio_adicional, :tipo_camiones, :numero_camiones, :capacidad_camiones, :id_ruta, NOW(), NOW())";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id_cliente', $id_cliente);
     $stmt->bindParam(':id_empleado', $id_empleado);
@@ -89,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindParam(':tipo_camiones', $tipo_camiones);
     $stmt->bindParam(':numero_camiones', $numero_camiones);
     $stmt->bindParam(':capacidad_camiones', $capacidad_camiones);
+    $stmt->bindParam(':id_ruta', $id_ruta);
     $stmt->execute();
 
     $id_cotizacion = $conn->lastInsertId(); // Obtener el ID de la cotización insertada
@@ -105,21 +135,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Actualizar el estado del camión a "Ocupado"
     $sql_update_camion = "UPDATE camion SET Status = 'Ocupado' WHERE ID_Camion = :id_camion";
     $stmt_update_camion = $conn->prepare($sql_update_camion);
-
     foreach ($camiones_libres as $id_camion) {
         $stmt_update_camion->bindParam(':id_camion', $id_camion);
         $stmt_update_camion->execute();
     }
 
-               // Insertar un mensaje en la tabla mensajes
-               $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fechaa.";
-               $tipo_mensaje = 'Cotizacion';
-               $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
-               $stmt_mensaje = $conn->prepare($sql_mensaje);
-               $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
-               $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
-               $stmt_mensaje->bindParam(':fecha', $fecha);
-               $stmt_mensaje->execute();
+    // Insertar un mensaje en la tabla mensajes
+    $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fecha.";
+    $tipo_mensaje = 'Cotizacion';
+    $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
+    $stmt_mensaje = $conn->prepare($sql_mensaje);
+    $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
+    $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
+    $stmt_mensaje->bindParam(':fecha', $fecha);
+    $stmt_mensaje->execute();
 
     // Insertar en la tabla log_movimientos
     $descripcion_log = "Cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion'.";
@@ -128,9 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_log->bindParam(':user_id', $usuario_id); // Suponiendo que el empleado que crea la cotización es quien realiza la acción
     $stmt_log->bindParam(':descripcion_log', $descripcion_log);
     $stmt_log->execute();
-          
-} 
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -189,14 +218,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="number" step="0.01" class="form-control" id="peso" name="peso" required>
         </div>
         <h2>Detalles del Traslado</h2>
-        <div class="mb-3">
-            <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
-            <input type="text" class="form-control" id="puntoA_origen" name="puntoA_origen" required>
-        </div>
-        <div class="mb-3">
-            <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
-            <input type="text" class="form-control" id="puntoB_destino" name="puntoB_destino" required>
-        </div>
+        <div class="form-group">
+       
+            <!-- Sección para seleccionar ruta -->
+            <div class="form-group">
+    <label for="ruta">Rutas Disponibles</label>
+    <select name="ruta" class="form-control" required>
+    <?php 
+    // Verifica si los datos del formulario están disponibles
+    if (isset($_POST['estadoOrigen']) && isset($_POST['municipioOrigen']) && isset($_POST['estadoDestino']) && isset($_POST['municipioDestino'])) {
+        // Obtiene las rutas disponibles
+        $rutas_disponibles = obtenerRutas($conn, $_POST['estadoOrigen'], $_POST['municipioOrigen'], $_POST['estadoDestino'], $_POST['municipioDestino']);
+        
+        // Verifica si se encontraron rutas
+        if (!empty($rutas_disponibles)) {
+            foreach ($rutas_disponibles as $ruta): ?>
+                <option value="<?= htmlspecialchars($ruta['ID_Ruta']) ?>">
+                    Desde: <?= htmlspecialchars($ruta['Estado_Origen']) ?>, <?= htmlspecialchars($ruta['Municipio_Origen']) ?> 
+                    Hasta: <?= htmlspecialchars($ruta['Estado_Destino']) ?>, <?= htmlspecialchars($ruta['Municipio_Destino']) ?>
+                    (<?= htmlspecialchars($ruta['Km']) ?> km)
+                </option>
+            <?php endforeach;
+        } else {
+            echo '<option value="">No se encontraron rutas disponibles</option>';
+        }
+    } else {
+        echo '<option value="">Selecciona un punto de origen y destino</option>';
+    } ?>
+</select>
+
+
+
+            </div>
         <div class="mb-3">
             <label for="fecha_traslado" class="form-label">Fecha del Traslado</label>
             <input type="date" class="form-control" id="fecha_traslado" name="fecha_traslado" required>

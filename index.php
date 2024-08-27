@@ -48,6 +48,7 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
             $menu .= "<li class='nav-item'><a href='facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
             $menu .= "<li class='nav-item'><a href='alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
+            $menu .= "<li class='nav-item'><a href='rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Rutas</a></li>";
             break;
         case 'Recursos Humanos':
             $menu .= "<li class='nav-item'><a href='inicio.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
