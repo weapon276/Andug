@@ -90,9 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $capacidad_camiones = $_POST['capacidad_camiones'];
     $dias_credito = $_POST['dias_credito'];
     $peso = $_POST['peso'];
-    $id_ruta = $_POST['ruta']; // Ruta seleccionada
 
     // Validar Tipo_Camiones
+    $id_ruta = isset($_POST['ruta']) ? $_POST['ruta'] : null; // Ruta seleccionada, si está presente
+
     $tipo_camiones = isset($_POST['tipo_camiones']) && !empty($_POST['tipo_camiones']) ? $_POST['tipo_camiones'] : 'DefaultType';
 
     // Insertar la cotización
@@ -121,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindParam(':id_ruta', $id_ruta);
     $stmt->execute();
 
+    
     $id_cotizacion = $conn->lastInsertId(); // Obtener el ID de la cotización insertada
 
     // Insertar en la tabla de unión cotizacion_camion
@@ -218,38 +220,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="number" step="0.01" class="form-control" id="peso" name="peso" required>
         </div>
         <h2>Detalles del Traslado</h2>
-        <div class="form-group">
-       
-            <!-- Sección para seleccionar ruta -->
-            <div class="form-group">
-    <label for="ruta">Rutas Disponibles</label>
-    <select name="ruta" class="form-control" required>
-    <?php 
-    // Verifica si los datos del formulario están disponibles
-    if (isset($_POST['estadoOrigen']) && isset($_POST['municipioOrigen']) && isset($_POST['estadoDestino']) && isset($_POST['municipioDestino'])) {
-        // Obtiene las rutas disponibles
-        $rutas_disponibles = obtenerRutas($conn, $_POST['estadoOrigen'], $_POST['municipioOrigen'], $_POST['estadoDestino'], $_POST['municipioDestino']);
-        
-        // Verifica si se encontraron rutas
-        if (!empty($rutas_disponibles)) {
-            foreach ($rutas_disponibles as $ruta): ?>
-                <option value="<?= htmlspecialchars($ruta['ID_Ruta']) ?>">
-                    Desde: <?= htmlspecialchars($ruta['Estado_Origen']) ?>, <?= htmlspecialchars($ruta['Municipio_Origen']) ?> 
-                    Hasta: <?= htmlspecialchars($ruta['Estado_Destino']) ?>, <?= htmlspecialchars($ruta['Municipio_Destino']) ?>
-                    (<?= htmlspecialchars($ruta['Km']) ?> km)
-                </option>
-            <?php endforeach;
-        } else {
-            echo '<option value="">No se encontraron rutas disponibles</option>';
-        }
-    } else {
-        echo '<option value="">Selecciona un punto de origen y destino</option>';
-    } ?>
-</select>
-
-
-
-            </div>
+        <div class="mb-3">
+            <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
+            <input type="text" class="form-control" id="puntoA_origen" name="puntoA_origen" required>
+        </div>
+        <div class="mb-3">
+            <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
+            <input type="text" class="form-control" id="puntoB_destino" name="puntoB_destino" required>
+        </div>
         <div class="mb-3">
             <label for="fecha_traslado" class="form-label">Fecha del Traslado</label>
             <input type="date" class="form-control" id="fecha_traslado" name="fecha_traslado" required>

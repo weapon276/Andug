@@ -2,11 +2,16 @@
 include 'conexion.php';
 include 'index.php';
 
-// Verificar si el usuario es administrador
-if ($_SESSION['user_type'] !== 'Administrador') {
+session_start(); // Asegúrate de iniciar la sesión
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['userType']) || !isset($_SESSION['userId'])) {
     header("Location: login.php");
     exit();
 }
+
+// Obtener el ID del usuario que está creando la factura
+$usuario_id = $_SESSION['userId'];
 
 // Función para obtener usuarios activos
 function obtenerUsuariosActivos($conn) {

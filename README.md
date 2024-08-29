@@ -72,6 +72,18 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
     - Se mejoró la estructura del PDF de la factura, incorporando el logo de la empresa y refinando el diseño general para un aspecto más profesional y claro.
     - Se implementó la funcionalidad para que el modal de información del cliente liste todas las facturas asociadas, permitiendo la descarga de cada factura de manera sencilla.
 
+### 2024-08-27
+- **Módulo:** Registro de Empleados
+  - **Descripción:**
+    - Se corrigió la función `registrarEmpleado()` para aceptar el número correcto de argumentos y se actualizó el manejo de errores en la inserción de datos de empleados.
+    - Se revisó y ajustó el manejo de parámetros en el archivo `registrar_empleado.php` para asegurar que se pasen los argumentos correctos a la función.
+
+### 2024-08-28
+- **Módulo:** Registro de Usuarios
+  - **Descripción:**
+    - Se solucionó el error relacionado con el número de parámetros en la función `registrarUsuario()` y se corrigió la declaración SQL para la inserción de datos de usuario.
+    - Se actualizó el archivo `registrar_empleado.php` para asegurar que la función `registrarEmpleado()` se llame con los parámetros correctos.
+
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`
 2. Configura la base de datos utilizando el archivo SQL proporcionado en `/database/`.

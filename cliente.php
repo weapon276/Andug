@@ -247,43 +247,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
     </table>
 
     <h2>Clientes Dados de Baja</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ID Cliente</th>
-                <th>Nombre</th>
-                <th>Dirección</th>
-                <th>Tipo</th>
-                <th>Línea de Crédito</th>
-                <th>Pago Contado</th>
-                <th>Status</th>
-                <th>Motivo de Baja</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($clientes as $cliente): 
-                if ($cliente['Status'] == 'Baja'):
-            ?>
-            <tr class="estado-baja">
-                <td><?php echo $cliente['ID_Cliente']; ?></td>
-                <td><?php echo htmlspecialchars($cliente['Nombre']); ?></td>
-                <td><?php echo htmlspecialchars($cliente['Direccion']); ?></td>
-                <td><?php echo htmlspecialchars($cliente['Tipo']); ?></td>
-                <td><?php echo $cliente['Linea_Credito']; ?></td>
-                <td><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></td>
-                <td><?php echo $cliente['Status']; ?></td>
-                <td><?php echo htmlspecialchars($cliente['Motivo_Baja']); ?></td>
-            </tr>
-            <?php endif; ?>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-<!-- Modal Información del Cliente -->
-<div class="modal fade" id="infoClienteModal<?php echo $cliente['ID_Cliente']; ?>" tabindex="-1" aria-labelledby="infoClienteModalLabel" aria-hidden="true">
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID Cliente</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Tipo</th>
+            <th>Línea de Crédito</th>
+            <th>Pago Contado</th>
+            <th>Status</th>
+            <th>Motivo de Baja</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($clientes as $cliente): 
+            if ($cliente['Status'] == 'Baja'):
+        ?>
+        <tr class="estado-baja">
+            <td>
+                <!-- Enlace para abrir el modal -->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#infoClienteModal<?php echo $cliente['ID_Cliente']; ?>">
+                    <?php echo $cliente['ID_Cliente']; ?>
+                </a>
+            </td>
+            <td><?php echo htmlspecialchars($cliente['Nombre']); ?></td>
+            <td><?php echo htmlspecialchars($cliente['Direccion']); ?></td>
+            <td><?php echo htmlspecialchars($cliente['Tipo']); ?></td>
+            <td><?php echo $cliente['Linea_Credito']; ?></td>
+            <td><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></td>
+            <td><?php echo $cliente['Status']; ?></td>
+            <td><?php echo htmlspecialchars($cliente['Motivo_Baja'] ?? ''); ?></td>
+            <td>
+                <!-- Aquí puedes agregar otros botones si es necesario -->
+            </td>
+        </tr>
+        <?php endif; ?>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<!-- Modales Información del Cliente -->
+<?php foreach ($clientes as $cliente): ?>
+<div class="modal fade" id="infoClienteModal<?php echo $cliente['ID_Cliente']; ?>" tabindex="-1" aria-labelledby="infoClienteModalLabel<?php echo $cliente['ID_Cliente']; ?>" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="infoClienteModalLabel">Información del Cliente: <?php echo htmlspecialchars($cliente['Nombre']); ?></h5>
+                <h5 class="modal-title" id="infoClienteModalLabel<?php echo $cliente['ID_Cliente']; ?>">Información del Cliente: <?php echo htmlspecialchars($cliente['Nombre']); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -301,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
                 <p><?php echo htmlspecialchars($cliente['Saldo_Linea_Credito']); ?></p>
 
                 <h6>Estatus de Servicios:</h6>
-                <p><?php echo htmlspecialchars($cliente['Estatus_Servicios']); ?></p>
+                <p><?php echo htmlspecialchars($cliente['Estatus_Servicios'] ?? ''); ?></p>
 
                 <h6>Facturas:</h6>
                 <?php
@@ -353,7 +363,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
                 }
                 ?>
 
-
                 <h6>Pago Contado:</h6>
                 <p><?php echo $cliente['Pago_Contado'] ? 'Sí' : 'No'; ?></p>
 
@@ -366,6 +375,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
         </div>
     </div>
 </div>
+<?php endforeach; ?>
+
+
 
 <!-- Modal de éxito -->
 <div class="modal fade" id="modalAlerta" tabindex="-1" aria-labelledby="modalAlertaLabel" aria-hidden="true">
