@@ -15,7 +15,7 @@ $usuario_id = $_SESSION['userId'];
 
 // Función para obtener usuarios activos
 function obtenerUsuariosActivos($conn) {
-    $sql = "SELECT * FROM usuarios WHERE Status = 'Activo'";
+    $sql = "SELECT * FROM usuarios WHERE bStatus = 'Activo'";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -23,7 +23,7 @@ function obtenerUsuariosActivos($conn) {
 
 // Función para obtener usuarios no activos (suspendidos o dados de baja)
 function obtenerUsuariosNoActivos($conn) {
-    $sql = "SELECT * FROM usuarios WHERE Status IN ('Suspendido', 'Baja')";
+    $sql = "SELECT * FROM usuarios WHERE bStatus IN ('Suspendido', 'Baja')";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -35,31 +35,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     $accion = $_POST['accion'];
     $nuevo_estado = $accion === 'suspender' ? 'Suspendido' : ($accion === 'eliminar' ? 'Baja' : 'Activo');
 
-    $sql = "UPDATE usuarios SET Status = :nuevo_estado, FechaUp = NOW() WHERE id = :id_usuario";
+    $sql = "UPDATE usuarios SET bStatus = :nuevo_estado, FechaUp = NOW() WHERE id = :id_usuario";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':nuevo_estado', $nuevo_estado);
     $stmt->bindParam(':id_usuario', $id_usuario);
     $stmt->execute();
 
-    header("Location: gestionar_usuarios.php");
     exit();
 }
 
-// Función para agregar un nuevo usuario
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['agregar_usuario'])) {
+// Función para modificar un usuario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['modificar_usuario'])) {
+    $id_usuario = $_POST['id_usuario'];
     $username = $_POST['username'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $user_type = $_POST['user_type'];
+    $user_type = $_POST['user_type']; // Asegúrate de que este sea el ID del tipo de usuario
 
-    $sql = "INSERT INTO usuarios (username, password, email, user_type, Status, created_at, fecha_inicio) VALUES (:username, :password, :email, :user_type, 'Activo', NOW(), NOW())";
+    // Actualizar la base de datos
+    $sql = "UPDATE usuarios SET username = :username, vCorreo = :email, fk_typeuser = :user_type, FechaUp = NOW() WHERE id = :id_usuario";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':username', $username);
-    $stmt->bindParam(':password', $password);
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':user_type', $user_type);
+    $stmt->bindParam(':id_usuario', $id_usuario);
     $stmt->execute();
-
+    // Redirigir a gestionar_usuarios.php después de la actualización
     header("Location: gestionar_usuarios.php");
     exit();
 }
@@ -69,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['modificar_usuario']))
     $id_usuario = $_POST['id_usuario'];
     $username = $_POST['username'];
     $email = $_POST['email'];
-    $user_type = $_POST['user_type'];
+    $user_type = $_POST['user_type']; // Asegúrate de que este sea el ID del tipo de usuario
 
-    $sql = "UPDATE usuarios SET username = :username, email = :email, user_type = :user_type, FechaUp = NOW() WHERE id = :id_usuario";
+    $sql = "UPDATE usuarios SET username = :username, vCorreo = :email, fk_typeuser = :user_type, FechaUp = NOW() WHERE id = :id_usuario";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':username', $username);
     $stmt->bindParam(':email', $email);
@@ -82,6 +82,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['modificar_usuario']))
     header("Location: gestionar_usuarios.php");
     exit();
 }
+// Función para obtener los tipos de usuario
+function obtenerTiposUsuarios($conn) {
+    $sql = "SELECT id_TypeUser, NombreTypeUser FROM typeuser";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
 $usuarios_activos = obtenerUsuariosActivos($conn);
 $usuarios_no_activos = obtenerUsuariosNoActivos($conn);
@@ -118,24 +126,25 @@ $usuarios_no_activos = obtenerUsuariosNoActivos($conn);
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($usuarios_activos as $usuario): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($usuario['username']); ?></td>
-                <td><?php echo htmlspecialchars($usuario['email']); ?></td>
-                <td><?php echo htmlspecialchars($usuario['user_type']); ?></td>
-                <td>
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSuspenderUsuario" data-id="<?php echo $usuario['id']; ?>">
-                        <i class="fa fa-exclamation-triangle"></i> Suspender
-                    </button>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarUsuario" data-id="<?php echo $usuario['id']; ?>">
-                        <i class="fa fa-times"></i> Eliminar
-                    </button>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalModificarUsuario" data-id="<?php echo $usuario['id']; ?>" data-username="<?php echo $usuario['username']; ?>" data-email="<?php echo $usuario['email']; ?>" data-user_type="<?php echo $usuario['user_type']; ?>">
-                        <i class="fa fa-book"></i> Modificar
-                    </button>
-                </td>
-            </tr>
-            <?php endforeach; ?>
+        <?php foreach ($usuarios_activos as $usuario): ?>
+    <tr>
+        <td><?php echo htmlspecialchars($usuario['username']); ?></td>
+        <td><?php echo isset($usuario['vCorreo']) ? htmlspecialchars($usuario['vCorreo']) : ''; ?></td>
+        <td><?php echo isset($usuario['NombreTypeUser']) ? htmlspecialchars($usuario['fk_typeuser']) : ''; ?></td>
+        <td>
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSuspenderUsuario" data-id="<?php echo htmlspecialchars($usuario['id']); ?>">
+                <i class="fa fa-exclamation-triangle"></i> Suspender
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarUsuario" data-id="<?php echo htmlspecialchars($usuario['id']); ?>">
+                <i class="fa fa-times"></i> Eliminar
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalModificarUsuario" data-id="<?php echo htmlspecialchars($usuario['id']); ?>" data-username="<?php echo htmlspecialchars($usuario['username']); ?>" data-email="<?php echo isset($usuario['email']) ? htmlspecialchars($usuario['email']) : ''; ?>" data-user_type="<?php echo isset($usuario['user_type']) ? htmlspecialchars($usuario['user_type']) : ''; ?>">
+                <i class="fa fa-book"></i> Modificar
+            </button>
+        </td>
+    </tr>
+<?php endforeach; ?>
+
         </tbody>
     </table>
 
@@ -155,9 +164,9 @@ $usuarios_no_activos = obtenerUsuariosNoActivos($conn);
             <?php foreach ($usuarios_no_activos as $usuario): ?>
             <tr>
                 <td><?php echo htmlspecialchars($usuario['username']); ?></td>
-                <td><?php echo htmlspecialchars($usuario['email']); ?></td>
-                <td><?php echo htmlspecialchars($usuario['user_type']); ?></td>
-                <td><?php echo htmlspecialchars($usuario['Status']); ?></td>
+                <td><?php echo htmlspecialchars($usuario['vCorreo']); ?></td>
+                <td><?php echo htmlspecialchars($usuario['fk_typeuser']); ?></td>
+                <td><?php echo htmlspecialchars($usuario['bStatus']); ?></td>
                 <td>
                     <form method="POST" action="gestionar_usuarios.php" style="display:inline-block;">
                         <input type="hidden" name="id_usuario" value="<?php echo $usuario['id']; ?>">
@@ -279,15 +288,18 @@ $usuarios_no_activos = obtenerUsuariosNoActivos($conn);
                         <input type="email" class="form-control" id="modificar_email" name="email" required>
                     </div>
                     <div class="mb-3">
-                        <label for="modificar_user_type" class="form-label">Tipo de Usuario</label>
-                        <select class="form-select" id="modificar_user_type" name="user_type" required>
-                            <option value="Administrador">Administrador</option>
-                            <option value="Contabilidad">Contabilidad</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                            <option value="Operador">Operador</option>
-                            <option value="Cliente">Cliente</option>
-                        </select>
-                    </div>
+    <label for="user_type" class="form-label">Tipo de Usuario</label>
+    <select class="form-select" id="user_type" name="user_type" required>
+        <?php
+        // Obtener los tipos de usuario desde la base de datos
+        $tiposUsuarios = obtenerTiposUsuarios($conn);
+        foreach ($tiposUsuarios as $tipo) {
+            echo "<option value=\"{$tipo['id_TypeUser']}\">{$tipo['NombreTypeUser']}</option>";
+        }
+        ?>
+    </select>
+</div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

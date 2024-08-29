@@ -80,7 +80,7 @@ function calcularEstadoVigencia($vigencia) {
             <tr>
                 <th>ID Cotización</th>
                 <th>Cliente</th>
-                <th>Empleado</th>
+                <th>lO atiende</th>
                 <th>Descripción</th>
                 <th>Monto</th>
                 <th>Fecha</th>

@@ -11,23 +11,10 @@ if (!isset($_SESSION['userType']) || !isset($_SESSION['userId'])) {
 
 // Obtener el ID del usuario que está creando el registro
 $usuario_id = $_SESSION['userId'];
-
-// Función para registrar un nuevo empleado
-function registrarEmpleado($conn, $nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath) {
-    // Validar el valor de Status para que coincida con los valores del ENUM
-    $status = in_array($status, ['Activo', 'ausente', 'Baja']) ? $status : 'Activo'; // Puedes definir un valor por defecto si es necesario
-
-    $sql = "INSERT INTO empleado (Nombre, ApellidoP, ApellidoM, Fk_usertype, Departamento, Posicion, Fecha_Contratacion, Salario, Status, Imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt->execute([$nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath])) {
-        $_SESSION['error_message'] = "Error al registrar empleado: " . implode(", ", $stmt->errorInfo());
-        header("Location: gestionar_empleados.php");
-        exit();
-    }
-    return $conn->lastInsertId(); // Retornar el ID del empleado registrado
-}
+$usuario_type = $_SESSION['userType']; // Agregar esta línea para obtener el tipo de usuario de la sesión
 
 
+// Función para registrar un nuevo usuario
 function registrarUsuario($conn, $username, $password, $correo, $fk_typeuser) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $sql = "INSERT INTO usuarios (username, nPass, vCorreo, fk_typeuser) VALUES (?, ?, ?, ?)";
@@ -37,8 +24,23 @@ function registrarUsuario($conn, $username, $password, $correo, $fk_typeuser) {
         header("Location: gestionar_empleados.php");
         exit();
     }
+    return $conn->lastInsertId(); // Retornar el ID del usuario registrado
 }
 
+// Función para registrar un nuevo empleado
+function registrarEmpleado($conn, $nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $fk_idUsuario, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath) {
+    // Validar el valor de Status para que coincida con los valores del ENUM
+    $status = in_array($status, ['Activo', 'ausente', 'Baja']) ? $status : 'Activo'; // Puedes definir un valor por defecto si es necesario
+
+    $sql = "INSERT INTO empleado (Nombre, ApellidoP, ApellidoM, Fk_usertype, fk_idUsuario, Departamento, Posicion, Fecha_Contratacion, Salario, Status, Imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt->execute([$nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $fk_idUsuario, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath])) {
+        $_SESSION['error_message'] = "Error al registrar empleado: " . implode(", ", $stmt->errorInfo());
+        header("Location: gestionar_empleados.php");
+        exit();
+    }
+    return $conn->lastInsertId(); // Retornar el ID del empleado registrado
+}
 
 // Función para registrar en log_movimientos y mensajes
 function registrarMovimiento($conn, $user_id, $accion, $descripcion) {
@@ -59,12 +61,13 @@ function registrarMensaje($conn, $user_id, $tipo_mensaje, $mensaje) {
         die('El tipo de usuario no existe en la base de datos.');
     }
 
-    // Inserta el mensaje si el tipo de usuario es válido
-    $sql = "INSERT INTO mensajes (fk_id_TypeUser, Tipo_Mensaje, Mensaje) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt->execute([$tipo_mensaje, $tipo_mensaje, $mensaje])) {
-        print_r($stmt->errorInfo());
-    }
+
+   // Inserta el mensaje si el tipo de usuario es válido
+   $sql = "INSERT INTO mensajes (fk_id_TypeUser, Tipo_Mensaje, Mensaje) VALUES (?, ?, ?)";
+   $stmt = $conn->prepare($sql);
+   if (!$stmt->execute([$tipo_mensaje, $tipo_mensaje, $mensaje])) {
+       print_r($stmt->errorInfo());
+   }
 }
 
 // Obtener tipos de usuarios para el select
@@ -88,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status = $_POST['status'];
     $username = $_POST['username'];
     $password = $_POST['password'];
-    
     $correo = $_POST['correo'];
     $fk_typeuser = isset($_POST['fk_typeuser']) ? $_POST['fk_typeuser'] : $Fk_usertype; // Usar Fk_usertype si fk_typeuser no está definido
 
@@ -109,12 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $imagenPath = NULL; // Si no se subió ninguna imagen
     }
 
-    // Asegúrate de pasar el número correcto de argumentos y en el orden correcto
-    $empleadoId = registrarEmpleado($conn, $nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath);
-    registrarUsuario($conn, $username, $password,  $correo, $fk_typeuser);
+    // Registrar usuario y obtener el ID generado
+    $fk_idUsuario = registrarUsuario($conn, $username, $password, $correo, $fk_typeuser);
+
+    // Registrar empleado usando el ID de usuario registrado
+    $empleadoId = registrarEmpleado($conn, $nombre, $ApellidoP, $ApellidoM, $Fk_usertype, $fk_idUsuario, $departamento, $posicion, $fechaContratacion, $salario, $status, $imagenPath);
     
-    registrarMovimiento($conn, $usuario_id, 'Registro de Empleado', 'Empleado agregado con ID: ' . $empleadoId);
-    registrarMensaje($conn, $usuario_id, $fk_typeuser, 'Se ha registrado un nuevo empleado con ID: ' . $empleadoId);
+    registrarMovimiento($conn, $usuario_id, 'Registro de Empleado', 'Empleado agregado con ID: ' . $empleadoId,$nombre, $ApellidoP);
+    
+    // Registrar mensaje utilizando el tipo de usuario que está haciendo el registro
+    registrarMensaje($conn, $usuario_id, $usuario_type, 'Se ha registrado un nuevo empleado con ID: ' . $empleadoId,$nombre, $ApellidoP);
 
     $_SESSION['registro_exito'] = true;
     header("Location: gestionar_empleados.php");
@@ -197,6 +203,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <button type="submit" class="btn btn-primary">Registrar</button>
     </form>
 </div>
+<!-- Modal de éxito -->
+<div class="modal fade" id="modalExito" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalExitoLabel">Éxito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¡Empleado registrado con éxito!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de error -->
+<div class="modal fade" id="modalError" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalErrorLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <?php echo isset($_SESSION['error_message']) ? $_SESSION['error_message'] : 'Hubo un problema al registrar el empleado.'; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php if (isset($_SESSION['registro_exito'])): ?>
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('modalExito'));
+        myModal.show();
+    </script>
+    <?php unset($_SESSION['registro_exito']); ?>
+<?php elseif (isset($_SESSION['error_message'])): ?>
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('modalError'));
+        myModal.show();
+    </script>
+    <?php unset($_SESSION['error_message']); ?>
+<?php endif; ?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

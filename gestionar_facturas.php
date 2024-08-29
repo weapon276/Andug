@@ -43,30 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_estado'])) {
         $id_cliente = $factura['ID_Cliente'];
         $linea_credito = $factura['Linea_Credito'];
         $total = $factura['Total'];
+        $comentario = isset($_POST['comentario']) ? $_POST['comentario'] : NULL;
 
-        // Ajuste de línea de crédito si el nuevo estado es "Pagado"
-        if ($nuevo_estado === 'Pagado' && $factura['Tipo_Pago'] === 'linea_credito') {
-            $nueva_linea_credito = $linea_credito + $total;
-            $sql = "UPDATE cliente SET Linea_Credito = :nueva_linea_credito WHERE ID_Cliente = :id_cliente";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':nueva_linea_credito', $nueva_linea_credito);
-            $stmt->bindParam(':id_cliente', $id_cliente);
-            $stmt->execute();
-        }
-
-        // Actualizar el estado de la factura y añadir comentario si corresponde
+        // Actualizar el estado de la factura
         $sql = "UPDATE factura SET Estado_Pago = :nuevo_estado, fecha_final = :fecha_final WHERE ID_Factura = :id_factura";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':nuevo_estado', $nuevo_estado);
         $stmt->bindParam(':fecha_final', $fecha_final);
         $stmt->bindParam(':id_factura', $id_factura);
         $stmt->execute();
-
+    
+        // Registro en log_movimientos si hay comentario
         if ($comentario) {
-            // Registro en log_movimientos
             $accion = ($nuevo_estado == 'Cancelado') ? 'Factura Cancelada' : 'Prorroga de Factura';
             $descripcion = $comentario;
-            $user_id = $_SESSION['userId']; // Asumiendo que hay una sesión iniciada con user_id
+            $user_id = $_SESSION['userId']; // Asegúrate de que la sesión está iniciada y el userId está disponible
+    
             $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:user_id, :accion, :descripcion)";
             $stmt_log = $conn->prepare($sql_log);
             $stmt_log->bindParam(':user_id', $user_id);
@@ -74,10 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_estado'])) {
             $stmt_log->bindParam(':descripcion', $descripcion);
             $stmt_log->execute();
         }
+    
+    
     }
-
-    header("Location: gestionar_facturas.php");
-    exit();
+ // Redirigir después de realizar las operaciones
+ exit();
 }
 ?>
 
@@ -157,9 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_estado'])) {
                 <td><?php echo $factura['Estado_Pago']; ?></td>
                 <td><?php echo $factura['fecha_final']; ?></td>
                 <td>
-   <!-- Botón de Pago -->
+  <!-- Botón de Pago -->
 <form method="POST" action="gestionar_facturas.php" style="display: inline;">
-    <input type="hidden" name="id_factura" value="<?php echo $factura['ID_Factura']; ?>">
+    <input type="hidden" name="id_factura" value="<?php echo htmlspecialchars($factura['ID_Factura']); ?>">
     <input type="hidden" name="nuevo_estado" value="Pagado">
     <button type="submit" name="update_estado" class="btn btn-success btn-sm" title="Marcar como Pagado">
         <i class="bi bi-credit-card"></i> <!-- Icono de tarjeta de crédito para representar el pago -->
