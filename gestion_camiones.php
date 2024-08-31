@@ -181,18 +181,18 @@ $camiones_no_activos = $conn->query($sql_no_activos)->fetchAll(PDO::FETCH_ASSOC)
                         <td><?php echo htmlspecialchars($camion['fecha_inicio']); ?></td>
                         <td>
                         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalMantenimientoCamion" data-id="<?php echo $camion['ID_Camion']; ?>">
-                        <i class="fa fa-tools"></i> Mantenimiento
+                        <i class="fa fa-tools"></i> 
                     </button>
                             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSuspenderCamion" data-id="<?php echo $camion['ID_Camion']; ?>">
-                                <i class="fa fa-pause"></i> Suspender
+                                <i class="fa fa-pause"></i>
                             </button>
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDarDeBajaCamion" data-id="<?php echo $camion['ID_Camion']; ?>">
-                                <i class="fa fa-trash"></i> Dar de Baja
+                                <i class="fa fa-trash"></i> 
                             </button>
                             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalModificarCamion" data-id="<?php echo $camion['ID_Camion']; ?>"
                                 data-placas="<?php echo $camion['Placas']; ?>" data-peso="<?php echo $camion['Peso']; ?>" data-unidad="<?php echo $camion['Unidad']; ?>"
                                 data-tipo="<?php echo $camion['Tipo']; ?>" data-poliza_seguro="<?php echo $camion['Poliza_Seguro']; ?>" data-gps="<?php echo $camion['GPS']; ?>">
-                                <i class="fa fa-edit"></i> Modificar
+                                <i class="fa fa-edit"></i> 
                             </button>
                         </td>
                     </tr>

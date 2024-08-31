@@ -74,14 +74,14 @@ if (isset($_GET['id_factura']) && isset($_SESSION['userId'])) {
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(80, 7, 'Descripcion de Productos', 1);
         $pdf->Cell(30, 7, 'Monto', 1);
-        $pdf->Cell(30, 7, 'Impuesto', 1);
-        $pdf->Cell(30, 7, 'Total', 1);
+        $pdf->Cell(30, 7, 'Impuesto %', 1);
+        $pdf->Cell(30, 7, 'Total con IVA', 1);
         $pdf->Ln();
 
         $pdf->SetFont('Arial', '', 12);
         $pdf->Cell(80, 7, htmlspecialchars($factura['Descripcion_Productos']), 1);
         $pdf->Cell(30, 7, '$' . number_format($factura['Monto'], 2), 1);
-        $pdf->Cell(30, 7, '$' . number_format($factura['Impuesto'], 2), 1);
+        $pdf->Cell(30, 7, '' . number_format($factura['Impuesto'], 2), 1);
         $pdf->Cell(30, 7, '$' . number_format($factura['Total'], 2), 1);
 
         // Enviar el PDF al navegador

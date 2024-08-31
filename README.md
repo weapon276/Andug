@@ -84,6 +84,26 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
     - Se solucionó el error relacionado con el número de parámetros en la función `registrarUsuario()` y se corrigió la declaración SQL para la inserción de datos de usuario.
     - Se actualizó el archivo `registrar_empleado.php` para asegurar que la función `registrarEmpleado()` se llame con los parámetros correctos.
 
+    ### 2024-08-29
+#### Módulo: Gestión de Camiones
+- **Funcionalidades añadidas:**
+  - Creación de `gestion_camiones.php` con opciones de modificación, suspensión, activación, baja y mantenimiento de camiones.
+  - Implementación de sistema de comentarios para registrar razones al suspender o dar de baja camiones.
+  - Modal para agregar nuevos camiones y tablas para mostrar camiones activos, suspendidos o dados de baja.
+  - Optimización de mensajes de éxito o error al realizar acciones.
+
+  ### 2024-08-30
+#### Módulo: Autenticación de Usuarios
+- **Problemas resueltos:**
+  - **Problema:** La función `obtenerNombreEmpleado` tenía un error en la consulta SQL, lo cual impedía obtener correctamente el nombre del empleado.
+  - **Corrección:** Se corrigió la consulta SQL eliminando el uso incorrecto de la coma y ajustando los parámetros para asegurar la correcta obtención del nombre completo del empleado a partir de su `ID_Usuario`. 
+
+#### Módulo: Interfaz de Usuario
+- **Problemas resueltos:**
+  - **Problema:** La interfaz de usuario no mostraba el nombre del empleado que inició sesión.
+  - **Corrección:** Se actualizó la interfaz para que muestre correctamente el nombre del empleado al iniciar sesión, utilizando la función corregida `obtenerNombreEmpleado`.
+
+
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`
 2. Configura la base de datos utilizando el archivo SQL proporcionado en `/database/`.

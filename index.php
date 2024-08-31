@@ -12,6 +12,7 @@ $user_type_id = $_SESSION['userType'];
 $username = $_SESSION['username'];
 $usuario_id = $_SESSION['userId'];
 
+
 // Evitar que el usuario vuelva a la página anterior después de cerrar sesión
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
@@ -169,7 +170,7 @@ function generarMenu($user_type) {
         <div class="d-flex flex-column p-3">
             <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
                 <img src="/w3images/avatar2.png" class="rounded-circle me-2" alt="Avatar" width="48" height="48">
-                <span class="fs-4">Bienvenido, <strong><?php echo $username; ?></strong></span>
+                <span class="fs-4">Bienvenido, <strong><?php echo $usuario_id; ?></strong></span>
             </a>
             <p>Usuario: <strong><?php echo $user_type; ?></strong></p>
             <hr>

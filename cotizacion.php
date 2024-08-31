@@ -22,13 +22,27 @@ function obtenerClientes($conn) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Función para obtener empleados
-function obtenerEmpleados($conn) {
-    $sql = "SELECT ID_Empleado, Nombre FROM empleado";
+// Función para obtener el nombre del empleado que inició sesión
+function obtenerNombreEmpleado($conn, $usuario_id) {
+    $sql = "SELECT ID_Empleado, CONCAT(Nombre, ' ', ApellidoP) AS NombreCompleto FROM empleado WHERE fk_idUsuario = :usuario_id";
     $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':usuario_id', $usuario_id, PDO::PARAM_INT);
     $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Verificar si se encontró el empleado
+    if (!$resultado) {
+        return null; // Retornar null si no se encontró el empleado
+    }
+
+    return $resultado;
 }
+
+// Consulta para obtener los municipios de origen y destino únicos de las rutas disponibles
+$sql = "SELECT DISTINCT Municipio_Origen, Municipio_Destino FROM rutas WHERE Estatus = 'Disponible'";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$rutas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Función para obtener camiones libres
 function obtenerCamionesLibres($conn) {
@@ -60,12 +74,8 @@ function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $m
     }
 }
 
-
-
-
-
 $clientes = obtenerClientes($conn);
-$empleados = obtenerEmpleados($conn);
+$empleado = obtenerNombreEmpleado($conn, $usuario_id); // Obtener nombre completo del empleado que inició sesión
 $camiones_libres = obtenerCamionesLibres($conn);
 
 // Manejar la solicitud de la cotización
@@ -122,7 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindParam(':id_ruta', $id_ruta);
     $stmt->execute();
 
-    
     $id_cotizacion = $conn->lastInsertId(); // Obtener el ID de la cotización insertada
 
     // Insertar en la tabla de unión cotizacion_camion
@@ -145,21 +154,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insertar un mensaje en la tabla mensajes
     $mensaje_texto = "Nueva cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion' en la fecha $fecha.";
     $tipo_mensaje = 'Cotizacion';
-    $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, :fecha)";
+    $sql_mensaje = "INSERT INTO mensajes (Tipo_Mensaje, Mensaje, Fecha_Envio) VALUES (:tipo_mensaje, :mensaje_texto, NOW())";
     $stmt_mensaje = $conn->prepare($sql_mensaje);
     $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
     $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
-    $stmt_mensaje->bindParam(':fecha', $fecha);
     $stmt_mensaje->execute();
+    echo '<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Cotización creada con éxito.
+                </div>
+            </div>
+        </div>
+    </div>';
 
-    // Insertar en la tabla log_movimientos
-    $descripcion_log = "Cotización creada para el cliente ID: $id_cliente con la descripción: '$descripcion'.";
-    $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:user_id, 'Creación de Cotización', :descripcion_log)";
-    $stmt_log = $conn->prepare($sql_log);
-    $stmt_log->bindParam(':user_id', $usuario_id); // Suponiendo que el empleado que crea la cotización es quien realiza la acción
-    $stmt_log->bindParam(':descripcion_log', $descripcion_log);
-    $stmt_log->execute();
+    echo '<script>
+        $(document).ready(function() {
+            $("#successModal").modal("show");
+            setTimeout(function() {
+                window.location.href = "gestionar_cotizacion.php";
+            }, 3000); // Redirigir después de 3 segundos
+        });
+    </script>';
 }
+
 ?>
 
 
@@ -169,13 +194,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Elaboración de Cotización</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 </head>
 <!-- Margen de tabla y menu lateral -->
 <div class="w3-main" style="margin-left:320px;margin-top:60px;">
 <!--Fin de margen -->
 <body>
+<div class="container">
+    <h2>Crear Cotización</h2>
+
+        <?php if (isset($_GET['success'])) : ?>
+            <div class="alert alert-success" role="alert">
+                La cotización se ha creado con éxito.
+            </div>
+        <?php endif; ?>
+
 <div class="container mt-5">
-    <h1>Elaboración de Cotización</h1>
+    <h1></h1>
     <form method="POST" action="cotizacion.php">
         <div class="mb-3">
             <label for="cliente" class="form-label">Cliente</label>
@@ -187,14 +223,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
         <div class="mb-3">
-            <label for="empleado" class="form-label">Empleado</label>
-            <select class="form-select" id="empleado" name="empleado" required>
-                <option value="">Seleccione un empleado</option>
-                <?php foreach ($empleados as $empleado): ?>
-                <option value="<?php echo $empleado['ID_Empleado']; ?>"><?php echo htmlspecialchars($empleado['Nombre']); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+        <div class="form-group">
+                <label for="empleado">Empleado</label>
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($empleado['NombreCompleto']); ?>" disabled>
+                <input type="hidden" name="empleado" value="<?php echo htmlspecialchars($empleado['ID_Empleado']); ?>">
+            </div>
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
             <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
@@ -221,13 +254,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <h2>Detalles del Traslado</h2>
         <div class="mb-3">
-            <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
-            <input type="text" class="form-control" id="puntoA_origen" name="puntoA_origen" required>
-        </div>
-        <div class="mb-3">
-            <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
-            <input type="text" class="form-control" id="puntoB_destino" name="puntoB_destino" required>
-        </div>
+                <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
+                <select class="form-control" id="puntoA_origen" name="puntoA_origen" required>
+                    <option value="">Seleccione un municipio de origen</option>
+                    <?php foreach ($rutas as $ruta): ?>
+                        <option value="<?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>">
+                            <?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
+                <select class="form-control" id="puntoB_destino" name="puntoB_destino" required>
+                    <option value="">Seleccione un municipio de destino</option>
+                    <?php foreach ($rutas as $ruta): ?>
+                        <option value="<?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>">
+                            <?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+    </div>
+
         <div class="mb-3">
             <label for="fecha_traslado" class="form-label">Fecha del Traslado</label>
             <input type="date" class="form-control" id="fecha_traslado" name="fecha_traslado" required>
@@ -283,5 +332,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Incluye jQuery y Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>
