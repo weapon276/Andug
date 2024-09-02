@@ -103,6 +103,35 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
   - **Problema:** La interfaz de usuario no mostraba el nombre del empleado que inició sesión.
   - **Corrección:** Se actualizó la interfaz para que muestre correctamente el nombre del empleado al iniciar sesión, utilizando la función corregida `obtenerNombreEmpleado`.
 
+### Fecha: 30 de Agosto de 2024
+
+#### Módulo Trabajado: Inserción de Viajes en la Base de Datos
+
+**Problemas:**
+ **Inconsistencia en la estructura del INSERT:** 
+   - Se detectaron discrepancias entre la sentencia SQL `INSERT INTO` y la estructura real de la tabla `viaje` en la base de datos. Las columnas especificadas en la sentencia de inserción no coincidían con las columnas definidas en la tabla, lo que provocó errores al intentar ejecutar la inserción.
+
+ **Columnas faltantes en la sentencia SQL:** 
+   - Algunas columnas requeridas por la tabla `viaje` no estaban siendo consideradas en la sentencia de inserción, como `ID_Camion`, `ID_Operador`, `Fecha_Despacho`, `Gastos`, entre otras.
+
+ **Incompatibilidad de tipos de datos:** 
+   - Se encontraron problemas con la correspondencia de tipos de datos entre los valores a insertar y los tipos de columnas en la tabla, lo que podría haber causado errores de ejecución y problemas de integridad de datos.
+
+**Soluciones:**
+ **Revisión y corrección de la sentencia `INSERT INTO`:** 
+   - Se ajustó la sentencia SQL de inserción para que coincida con la estructura de la tabla `viaje`. Se actualizaron los nombres de las columnas y se añadieron todas las columnas requeridas para evitar errores de ejecución.
+
+ **Vinculación de parámetros corregida:** 
+   - Se aseguró que todos los parámetros vinculados en la sentencia `INSERT INTO` tengan valores correspondientes y estén correctamente definidos antes de ejecutar la consulta, lo que garantiza la integridad de los datos insertados.
+
+ **Validación de tipos de datos:** 
+   - Se revisaron y validaron los tipos de datos para asegurar que sean compatibles con los definidos en la base de datos, previniendo errores de tipo de datos y asegurando que los datos se almacenen correctamente.
+
+**Otros Cambios Realizados:**
+- Se actualizaron las descripciones y comentarios en el código para mayor claridad y mantenimiento futuro.
+- Se probó la funcionalidad de inserción de viajes para asegurar que los datos se almacenan correctamente en la base de datos.
+- Se realizaron pruebas de validación para asegurar que la funcionalidad respeta las restricciones de la base de datos y se ejecuta sin errores.
+
 
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`

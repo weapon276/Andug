@@ -3,11 +3,14 @@
 include 'conexion.php';
 include 'index.php';
 
-// Verificar si el usuario está autenticado y tiene permisos de administrador
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] != 'Administrador') {
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['userType'])) {
     header("Location: login.php");
     exit();
 }
+
+// Obtener el ID del usuario que está creando la factura
+$usuario_id = $_SESSION['userId'];
 
 // Función para obtener todos los viajes
 function obtenerViajes($conn) {
@@ -16,7 +19,7 @@ function obtenerViajes($conn) {
             LEFT JOIN camion ON viaje.ID_Camion = camion.ID_Camion
             LEFT JOIN operador ON viaje.ID_Operador = operador.ID_Operador
             LEFT JOIN cliente ON viaje.ID_Cliente = cliente.ID_Cliente
-            LEFT JOIN rutas ON viaje.ID_Ruta = rutas.ID_Ruta";
+            LEFT JOIN rutas ON viaje.Fk_idRuta = rutas.ID_Ruta";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

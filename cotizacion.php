@@ -134,6 +134,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id_cotizacion = $conn->lastInsertId(); // Obtener el ID de la cotización insertada
 
+    // Insertar el viaje
+// Insertar el viaje
+$sql = "INSERT INTO viaje 
+        (ID_Camion, ID_Operador, ID_Cliente, Fk_idRuta, Fk_IdCotizacion, Fecha_Despacho, Fecha_Llegada, Pedimentos, Contenedores, Gastos, Status, fecha_inicio, fecha_final, Toneladas, Comentarios) 
+        VALUES 
+        (:id_camion, :id_operador, :id_cliente, :id_ruta, :id_cotizacion, :fecha_despacho, :fecha_llegada, :pedimentos, :contenedores, :gastos, :status, NOW(), NOW(), :toneladas, :comentarios)";
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':id_camion', $id_camion);
+$stmt->bindParam(':id_operador', $id_operador);
+$stmt->bindParam(':id_cliente', $id_cliente);
+$stmt->bindParam(':id_ruta', $id_ruta);
+$stmt->bindParam(':id_cotizacion', $id_cotizacion);
+$stmt->bindParam(':fecha_despacho', $horario_carga);
+$stmt->bindParam(':fecha_llegada', $fecha_llegada);
+$stmt->bindParam(':pedimentos', $pedimentos);
+$stmt->bindParam(':contenedores', $contenedores);
+$stmt->bindParam(':gastos', $gastos);
+$stmt->bindParam(':status', $status);
+$stmt->bindParam(':toneladas', $toneladas);
+$stmt->bindParam(':comentarios', $comentarios);
+$stmt->execute();
+
+    $id_viaje = $conn->lastInsertId(); // Obtener el ID del viaje insertado
+
+
     // Insertar en la tabla de unión cotizacion_camion
     $sql_insert_cotizacion_camion = "INSERT INTO cotizacion_camion (ID_Cotizacion, ID_Camion) VALUES (:id_cotizacion, :id_camion)";
     $stmt_insert_cotizacion_camion = $conn->prepare($sql_insert_cotizacion_camion);
@@ -159,6 +184,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_mensaje->bindParam(':tipo_mensaje', $tipo_mensaje);
     $stmt_mensaje->bindParam(':mensaje_texto', $mensaje_texto);
     $stmt_mensaje->execute();
+
+     // Registrar el movimiento en la tabla de log
+     $descripcion_log = "Cotizacion creada para Cliente ID: $id_cliente con ID de cotizacion $id_cotizacion. ";
+     $sql_log = "INSERT INTO log_movimientos (user_id, accion, descripcion) VALUES (:userId, 'Creación de Factura', :descripcion)";
+     $stmt_log = $conn->prepare($sql_log);
+     $stmt_log->bindParam(':userId', $usuario_id);
+     $stmt_log->bindParam(':descripcion', $descripcion_log);
+     $stmt_log->execute();
+
+
     echo '<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -316,14 +351,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="number" class="form-control" id="numero_camiones" name="numero_camiones" required>
         </div>
         <div class="mb-3">
-            <label for="capacidad_camiones" class="form-label">Capacidad de Carga de los Camiones</label>
+            <label for="capacidad_camiones" class="form-label">Capacidad de Carga del Camion</label>
             <input type="text" class="form-control" id="capacidad_camiones" name="capacidad_camiones" required>
         </div>
         <h2>Detalles de Servicio</h2>
-        <div class="mb-3">
-            <label for="rutas" class="form-label">Rutas (Formato JSON)</label>
-            <textarea class="form-control" id="rutas" name="rutas[]" rows="3" required></textarea>
-        </div>
         <div class="mb-3">
             <label for="detalles" class="form-label">Detalles de Servicio (Formato JSON)</label>
             <textarea class="form-control" id="detalles" name="detalles[]" rows="3" required></textarea>
