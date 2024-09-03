@@ -137,26 +137,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insertar el viaje
 // Insertar el viaje
 $sql = "INSERT INTO viaje 
-        (ID_Camion, ID_Operador, ID_Cliente, Fk_idRuta, Fk_IdCotizacion, Fecha_Despacho, Fecha_Llegada, Pedimentos, Contenedores, Gastos, Status, fecha_inicio, fecha_final, Toneladas, Comentarios) 
+        (ID_Camion, ID_Operador, ID_Cliente, Fk_idRuta, Fk_IdCotizacion, Fecha_Despacho, Fecha_Llegada, Pedimentos, Contenedores, Gastos, fecha_inicio, fecha_final, Toneladas, Comentarios) 
         VALUES 
-        (:id_camion, :id_operador, :id_cliente, :id_ruta, :id_cotizacion, :fecha_despacho, :fecha_llegada, :pedimentos, :contenedores, :gastos, :status, NOW(), NOW(), :toneladas, :comentarios)";
+        (:id_camion, :id_operador, :id_cliente, :id_ruta, :id_cotizacion, :fecha_despacho, :fecha_llegada, :pedimentos, :contenedores, :monto, NOW(), NOW(), :toneladas, :comentarios)";
+
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':id_camion', $id_camion);
 $stmt->bindParam(':id_operador', $id_operador);
 $stmt->bindParam(':id_cliente', $id_cliente);
-$stmt->bindParam(':id_ruta', $id_ruta);
+$stmt->bindParam(':id_ruta', $id_ruta); // Vinculación correcta de `:id_ruta`
 $stmt->bindParam(':id_cotizacion', $id_cotizacion);
-$stmt->bindParam(':fecha_despacho', $horario_carga);
-$stmt->bindParam(':fecha_llegada', $fecha_llegada);
+$stmt->bindParam(':fecha_despacho', $horario_carga); // Verifica que `horario_carga` es correcto para `Fecha_Despacho`
+$stmt->bindParam(':fecha_llegada', $horario_descarga);
 $stmt->bindParam(':pedimentos', $pedimentos);
 $stmt->bindParam(':contenedores', $contenedores);
-$stmt->bindParam(':gastos', $gastos);
-$stmt->bindParam(':status', $status);
+$stmt->bindParam(':monto', $monto);
 $stmt->bindParam(':toneladas', $toneladas);
 $stmt->bindParam(':comentarios', $comentarios);
+
+// Ejecutar la consulta
 $stmt->execute();
 
-    $id_viaje = $conn->lastInsertId(); // Obtener el ID del viaje insertado
+// Obtener el ID del viaje insertado
+$id_viaje = $conn->lastInsertId(); 
 
 
     // Insertar en la tabla de unión cotizacion_camion
@@ -318,11 +321,11 @@ $stmt->execute();
         </div>
         <div class="mb-3">
             <label for="horario_carga" class="form-label">Horario de Carga</label>
-            <input type="time" class="form-control" id="horario_carga" name="horario_carga" required>
+            <input type="datetime-local" class="form-control" id="horario_carga" name="horario_carga" required>
         </div>
         <div class="mb-3">
             <label for="horario_descarga" class="form-label">Horario de Descarga</label>
-            <input type="time" class="form-control" id="horario_descarga" name="horario_descarga" required>
+            <input type="datetime-local" class="form-control" id="horario_descarga" name="horario_descarga" required>
         </div>
         <div class="mb-3">
             <label for="tipo_mercancia" class="form-label">Tipo de Mercancía</label>
@@ -356,7 +359,7 @@ $stmt->execute();
         </div>
         <h2>Detalles de Servicio</h2>
         <div class="mb-3">
-            <label for="detalles" class="form-label">Detalles de Servicio (Formato JSON)</label>
+            <label for="detalles" class="form-label">Detalles de Servicio </label>
             <textarea class="form-control" id="detalles" name="detalles[]" rows="3" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Crear Cotización</button>
