@@ -132,6 +132,49 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
 - Se probó la funcionalidad de inserción de viajes para asegurar que los datos se almacenan correctamente en la base de datos.
 - Se realizaron pruebas de validación para asegurar que la funcionalidad respeta las restricciones de la base de datos y se ejecuta sin errores.
 
+### 2024-09-02
+
+#### Módulos Trabajados
+- **Revisión de la estructura de la base de datos**: Asegurarse de que todas las tablas necesarias para el proyecto estén correctamente definidas.
+
+#### Actualizaciones
+- Verificación y ajuste de las relaciones entre las tablas para garantizar la integridad referencial y el correcto funcionamiento de las consultas.
+
+#### Problemas Enfrentados
+- **Errores de sintaxis SQL**: Ajustes menores en las declaraciones SQL para asegurar la compatibilidad con la estructura de la base de datos.
+
+### 2024-09-03
+
+#### Módulos Trabajados
+- **`viaje.php`**: Implementación de la gestión de viajes con las siguientes características:
+  - **Visualización** de todos los viajes registrados en la base de datos.
+  - **Modificación** del estado del viaje con botones para "Modificar", "Completado", "Cancelado" y "Suspender".
+  - **Modal de comentarios** para cuando se selecciona la opción "Suspender", permitiendo ingresar razones para la suspensión del viaje.
+  - **Obtención de información** relacionada de las tablas `rutas`, `cotizacion`, `operador`, y `cliente`.
+
+#### Actualizaciones
+- Se añadió un **modal** para la opción "Suspender", permitiendo ingresar comentarios sobre la razón de la suspensión.
+- Se corrigió el código para el manejo de datos con PDO, reemplazando el método `fetch_assoc()` por `fetch(PDO::FETCH_ASSOC)`.
+
+#### Problemas Enfrentados
+- **Error de método no definido**: El método `fetch_assoc()` no es válido para PDO en PHP. Se resolvió reemplazándolo con `fetch(PDO::FETCH_ASSOC)`.
+
+### 2024-09-04
+
+#### Módulos Trabajados
+- **`viaje.php`**: Actualización para la gestión de viajes con las siguientes características:
+  - **Visualización** de todos los viajes registrados en la base de datos.
+  - **Modificación** del estado del viaje con botones para "Modificar", "Completado", "Cancelado" y "Suspender".
+  - **Modal de comentarios** para cuando se selecciona la opción "Suspender", permitiendo ingresar razones para la suspensión del viaje.
+  - **Obtención de información** relacionada de las tablas `rutas`, `cotizacion`, `operador`, y `cliente`.
+  
+#### Actualizaciones
+- Se corrigió un **error de método no definido** en el archivo `viaje.php`, reemplazando el método `fetch_assoc()` con `fetch(PDO::FETCH_ASSOC)` para cumplir con la sintaxis de PDO.
+- Se ha **mejorado la funcionalidad del modal** para comentarios en la opción "Suspender", permitiendo una mejor interacción con el usuario.
+
+#### Problemas Enfrentados
+- **Error de método no definido**: Se enfrentó un problema con el uso del método `fetch_assoc()` en PDO, el cual fue solucionado al actualizar el código con `fetch(PDO::FETCH_ASSOC)`.
+
 
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`

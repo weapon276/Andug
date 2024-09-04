@@ -12,6 +12,14 @@ $user_type_id = $_SESSION['userType'];
 $username = $_SESSION['username'];
 $usuario_id = $_SESSION['userId'];
 
+// Obtener el nombre y la imagen del empleado
+$query = "SELECT Nombre, Imagen FROM empleado WHERE fk_idUsuario = :usuario_id";
+$stmt = $conn->prepare($query);
+$stmt->bindParam(':usuario_id', $usuario_id, PDO::PARAM_INT);
+$stmt->execute();
+$empleado = $stmt->fetch(PDO::FETCH_ASSOC);
+$nombreEmpleado = $empleado['Nombre'];
+$imagenEmpleado = $empleado['Imagen'];
 
 // Evitar que el usuario vuelva a la página anterior después de cerrar sesión
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -50,7 +58,7 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
             $menu .= "<li class='nav-item'><a href='facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
             $menu .= "<li class='nav-item'><a href='alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
-            $menu .= "<li class='nav-item'><a href='rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Rutas</a></li>";
+            $menu .= "<li class='nav-item'><a href='rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";
             break;
         case 'Recursos Humanos':
             $menu .= "<li class='nav-item'><a href='inicio.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
@@ -170,7 +178,7 @@ function generarMenu($user_type) {
         <div class="d-flex flex-column p-3">
             <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
                 <img src="/w3images/avatar2.png" class="rounded-circle me-2" alt="Avatar" width="48" height="48">
-                <span class="fs-4">Bienvenido, <strong><?php echo $usuario_id; ?></strong></span>
+                <span class="fs-4">Bienvenido, <strong><?php echo $nombreEmpleado; ?></strong></span>
             </a>
             <p>Usuario: <strong><?php echo $user_type; ?></strong></p>
             <hr>
