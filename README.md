@@ -175,6 +175,31 @@ Este proyecto es una aplicación web para la gestión de flotas de camiones, seg
 #### Problemas Enfrentados
 - **Error de método no definido**: Se enfrentó un problema con el uso del método `fetch_assoc()` en PDO, el cual fue solucionado al actualizar el código con `fetch(PDO::FETCH_ASSOC)`.
 
+### 2024-09-11
+
+#### Módulos Trabajados
+**Viaje (viaje.php)**
+
+Problemas Enfrentados:
+**Error en la Carga de Rutas:**
+
+Descripción: **Al intentar cargar las rutas para un nuevo viaje**, se presentó un error que impedía la visualización correcta de las rutas disponibles.
+Solución: Se actualizó la consulta SQL para asegurar que todas las rutas se carguen correctamente desde la base de datos. También se mejoró la lógica en el backend para manejar posibles excepciones durante la carga.
+
+**Inconsistencia en el Registro de Gastos:**
+Algunos gastos asociados a los viajes no se estaban registrando correctamente en la base de datos.
+Solución: Se revisó y corrigió el código que gestiona el registro de gastos, asegurando que cada gasto se vincule correctamente con el viaje correspondiente.
+
+**Mejoras/Anexos:**
+Interfaz de Usuario Mejorada:
+Descripción: Se mejoró el diseño de la interfaz de usuario para la selección de rutas y el registro de gastos, incluyendo una visualización más clara de la información y una navegación más intuitiva.
+
+**Validación de Datos Mejorada:**
+Descripción: Se añadieron validaciones adicionales para asegurar que todos los campos necesarios para registrar un viaje estén completos antes de permitir el envío del formulario.
+
+**Optimización de Consultas SQL:**
+Descripción: Se optimizaron las consultas SQL utilizadas en viaje.php para mejorar el rendimiento y reducir el tiempo de carga.
+
 
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`

@@ -2,6 +2,7 @@
 session_start();
 require 'conexion.php';
 
+
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userId'])) {
     header("Location: login.php");
@@ -51,6 +52,7 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='generar_reportes.php' class='nav-link'><i class='fas fa-chart-line'></i> Generar reportes</a></li>";
             break;
         case 'Contabilidad':
+            $menu .= "<li class='nav-item'><a href='viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Viajes</a></li>";
             $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
             $menu .= "<li class='nav-item'><a href='gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
