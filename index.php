@@ -34,6 +34,48 @@ $stmt->bindParam(':user_type_id', $user_type_id, PDO::PARAM_INT);
 $stmt->execute();
 $user_type = $stmt->fetch(PDO::FETCH_ASSOC)['NombreTypeUser'];
 
+// Función para restringir el acceso basado en el tipo de usuario
+function verificarAcceso($user_type, $paginasPermitidas) {
+    $paginaActual = basename($_SERVER['PHP_SELF']);
+    if (!in_array($paginaActual, $paginasPermitidas)) {
+        echo "<script>
+            alert('No tienes acceso a esta página.');
+            setTimeout(function() {
+                window.location.href = 'index.php';
+            }, 3000);
+        </script>";
+        exit();
+    }
+}
+
+// Definir páginas permitidas por tipo de usuario
+switch ($user_type) {
+    case 'Admin':
+        $paginasPermitidas = ['inicioa.php', 'gestionar_usuarios.php', 'gestionar_empleado.php', 'gestionar_camiones.php'];
+        break;
+    case 'Administrador':
+        $paginasPermitidas = ['inicioa.php', 'gestionar_usuarios.php', 'gestionar_empleado.php', 'gestionar_camiones.php'];
+        break;
+    case 'Contabilidad':
+        $paginasPermitidas = ['index.php','viaje.php', 'cliente.php', 'gestion_camiones.php'];
+        break;
+    case 'Recursos Humanos':
+        $paginasPermitidas = ['index.php','inicio.php', 'gestionar_empleados.php', 'registrar_empleado.php'];
+        break;
+    case 'Operador':
+        $paginasPermitidas = ['index.php','viaje.php'];
+        break;
+    case 'Cliente':
+        $paginasPermitidas = ['cliente_viajes.php', 'consultar_facturas.php'];
+        break;
+    default:
+        $paginasPermitidas = ['index.php']; // Página por defecto
+        break;
+}
+
+// Verificar si el usuario tiene acceso a la página actual
+verificarAcceso($user_type, $paginasPermitidas);
+
 // Función para generar el menú
 function generarMenu($user_type) {
     $menu = "<ul class='nav nav-pills flex-column mb-auto'>";
