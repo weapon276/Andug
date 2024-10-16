@@ -357,11 +357,6 @@ $id_viaje = $conn->lastInsertId();
             <label for="capacidad_camiones" class="form-label">Capacidad de Carga del Camion</label>
             <input type="text" class="form-control" id="capacidad_camiones" name="capacidad_camiones" required>
         </div>
-        <h2>Detalles de Servicio</h2>
-        <div class="mb-3">
-            <label for="detalles" class="form-label">Detalles de Servicio </label>
-            <textarea class="form-control" id="detalles" name="detalles[]" rows="3" required></textarea>
-        </div>
         <button type="submit" class="btn btn-primary">Crear Cotización</button>
     </form>
 </div>

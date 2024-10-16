@@ -57,7 +57,7 @@ switch ($user_type) {
         $paginasPermitidas = ['inicioa.php', 'gestionar_usuarios.php', 'gestionar_empleado.php', 'gestionar_camiones.php'];
         break;
     case 'Contabilidad':
-        $paginasPermitidas = ['index.php','viaje.php', 'cliente.php', 'gestion_camiones.php'];
+        $paginasPermitidas = ['gestionar_cotizacion.php','cotizacion.php','remolque.php','index.php','viaje.php', 'cliente.php', 'gestion_camiones.php'];
         break;
     case 'Recursos Humanos':
         $paginasPermitidas = ['index.php','inicio.php', 'gestionar_empleados.php', 'registrar_empleado.php'];
@@ -96,6 +96,7 @@ function generarMenu($user_type) {
         case 'Contabilidad':
             $menu .= "<li class='nav-item'><a href='viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Viajes</a></li>";
             $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
+            $menu .= "<li class='nav-item'><a href='remolque.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Remolques</a></li>";
             $menu .= "<li class='nav-item'><a href='gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar Cotizacion</a></li>";

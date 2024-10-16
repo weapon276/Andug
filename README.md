@@ -200,6 +200,24 @@ Descripción: Se añadieron validaciones adicionales para asegurar que todos los
 **Optimización de Consultas SQL:**
 Descripción: Se optimizaron las consultas SQL utilizadas en viaje.php para mejorar el rendimiento y reducir el tiempo de carga.
 
+### 2024-10-14
+
+#### Módulos Trabajados
+
+**Módulo Trabajado: Login y Seguridad**
+Descripción:
+Se actualizó el formulario de inicio de sesión para incorporar colores más atractivos: #e03c12, #285de2, #ee7755, #f4c0b2, #323232, y se añadió una imagen de fondo difuminada.
+Correcciones:
+Errores de autenticación: Se solucionó un problema en la validación de credenciales, evitando errores de acceso a usuarios válidos.
+Sesiones: Se mejoró el manejo de sesiones, asegurando que solo un usuario autenticado pueda acceder a las páginas protegidas.
+
+**Módulo Trabajado: Facturación**
+Descripción:
+Optimización del diseño del PDF de facturas, añadiendo el logo de la empresa y una estructura visual mejorada.
+Se implementó un sistema de descarga para las facturas dentro del modal de cliente, permitiendo descargar las facturas asociadas con solo un clic.
+Correcciones:
+Generación de PDF: Se corrigieron errores en la generación del PDF, ajustando márgenes y formato de los campos para que se muestren correctamente.
+Enlaces de descarga: Se ajustaron los enlaces de descarga de facturas para que apunten al recurso correcto.
 
 ## Instalación y Configuración
 1. Clona el repositorio: `git clone https://github.com/tu-usuario/gestion-de-flotas-andug.git`
