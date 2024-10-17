@@ -51,6 +51,18 @@ function obtenerCamionesLibres($conn) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function obtenerContenedores($conn) {
+    $sql = "SELECT ID_Contenedor, Tipo, Peso, Dimensiones FROM contenedor";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function obtenerRutasDisponibles($conn) {
+    $sql = "SELECT ID_Ruta, Estado_Origen, Municipio_Origen, Estado_Destino, Municipio_Destino, Km FROM rutas WHERE Estatus = 'Disponible'";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $municipioDestino) {
     try {
@@ -75,8 +87,10 @@ function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $m
 }
 
 $clientes = obtenerClientes($conn);
-$empleado = obtenerNombreEmpleado($conn, $usuario_id); // Obtener nombre completo del empleado que inició sesión
+$empleado = obtenerNombreEmpleado($conn, $usuario_id);
 $camiones_libres = obtenerCamionesLibres($conn);
+$contenedores = obtenerContenedores($conn);
+$rutas_disponibles = obtenerRutasDisponibles($conn);
 
 // Manejar la solicitud de la cotización
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -223,6 +237,7 @@ $id_viaje = $conn->lastInsertId();
     </script>';
 }
 
+
 ?>
 
 
@@ -291,54 +306,50 @@ $id_viaje = $conn->lastInsertId();
             <input type="number" step="0.01" class="form-control" id="peso" name="peso" required>
         </div>
         <h2>Detalles del Traslado</h2>
-        <div class="mb-3">
-                <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
-                <select class="form-control" id="puntoA_origen" name="puntoA_origen" required>
-                    <option value="">Seleccione un municipio de origen</option>
-                    <?php foreach ($rutas as $ruta): ?>
-                        <option value="<?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>">
-                            <?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
-                <select class="form-control" id="puntoB_destino" name="puntoB_destino" required>
-                    <option value="">Seleccione un municipio de destino</option>
-                    <?php foreach ($rutas as $ruta): ?>
-                        <option value="<?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>">
-                            <?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-    </div>
 
-        <div class="mb-3">
-            <label for="fecha_traslado" class="form-label">Fecha del Traslado</label>
-            <input type="date" class="form-control" id="fecha_traslado" name="fecha_traslado" required>
-        </div>
-        <div class="mb-3">
-            <label for="horario_carga" class="form-label">Horario de Carga</label>
-            <input type="datetime-local" class="form-control" id="horario_carga" name="horario_carga" required>
-        </div>
-        <div class="mb-3">
-            <label for="horario_descarga" class="form-label">Horario de Descarga</label>
-            <input type="datetime-local" class="form-control" id="horario_descarga" name="horario_descarga" required>
-        </div>
-        <div class="mb-3">
-            <label for="tipo_mercancia" class="form-label">Tipo de Mercancía</label>
-            <textarea class="form-control" id="tipo_mercancia" name="tipo_mercancia" rows="3" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="condiciones_mercancia" class="form-label">Condiciones de la Mercancía</label>
-            <textarea class="form-control" id="condiciones_mercancia" name="condiciones_mercancia" rows="3" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="servicio_adicional" class="form-label">Servicio Adicional</label>
-            <textarea class="form-control" id="servicio_adicional" name="servicio_adicional" rows="3" required></textarea>
-        </div>
+<!-- Selección de rutas -->
+<div class="mb-3">
+    <label for="puntoA_origen" class="form-label">Punto A de Origen</label>
+    <select class="form-control" id="puntoA_origen" name="puntoA_origen" required>
+        <option value="">Seleccione un municipio de origen</option>
+        <?php foreach ($rutas as $ruta): ?>
+            <option value="<?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>">
+                <?php echo htmlspecialchars($ruta['Municipio_Origen']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label for="puntoB_destino" class="form-label">Punto B de Destino</label>
+    <select class="form-control" id="puntoB_destino" name="puntoB_destino" required>
+        <option value="">Seleccione un municipio de destino</option>
+        <?php foreach ($rutas as $ruta): ?>
+            <option value="<?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>">
+                <?php echo htmlspecialchars($ruta['Municipio_Destino']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+<!-- Botón para agregar la ruta seleccionada -->
+<button type="button" class="btn btn-primary" id="agregarRuta">Agregar Ruta</button>
+
+<!-- Tabla para mostrar las rutas seleccionadas -->
+<h3>Rutas Seleccionadas</h3>
+<table class="table table-bordered" id="tablaRutas">
+    <thead>
+        <tr>
+            <th>Punto A de Origen</th>
+            <th>Punto B de Destino</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="rutasBody">
+        <!-- Aquí se añadirán las rutas seleccionadas -->
+    </tbody>
+</table>
+
         <h2>Detalles de la Flotilla</h2>
         <div class="mb-3">
     <label for="camiones_libres" class="form-label">Seleccionar Camiones Libres</label>
@@ -348,18 +359,111 @@ $id_viaje = $conn->lastInsertId();
     <?php endforeach; ?>
     </select>
 </div>
-
-        <div class="mb-3">
-            <label for="numero_camiones" class="form-label">Número de Camiones</label>
-            <input type="number" class="form-control" id="numero_camiones" name="numero_camiones" required>
+<div class="form-group">
+            <label for="tipo_camiones">Tipo de Contenedor</label>
+            <select id="tipo_camiones" name="tipo_camiones" class="form-control">
+                <?php foreach ($contenedores as $contenedor) { ?>
+                    <option value="<?= $contenedor['ID_Contenedor'] ?>"><?= $contenedor['Tipo'] ?> (Peso: <?= $contenedor['Peso'] ?>, Dimensiones: <?= $contenedor['Dimensiones'] ?>)</option>
+                <?php } ?>
+            </select>
         </div>
-        <div class="mb-3">
-            <label for="capacidad_camiones" class="form-label">Capacidad de Carga del Camion</label>
-            <input type="text" class="form-control" id="capacidad_camiones" name="capacidad_camiones" required>
+
+        <div class="form-group">
+            <label for="capacidad_camiones">Capacidad de Carga del Camión</label>
+            <input type="number" id="capacidad_camiones" name="capacidad_camiones" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Crear Cotización</button>
     </form>
 </div>
+        <!-- Modal para agregar rutas -->
+        <div class="modal fade" id="rutasModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Seleccionar Ruta</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Estado Origen</th>
+                                    <th>Municipio Origen</th>
+                                    <th>Estado Destino</th>
+                                    <th>Municipio Destino</th>
+                                    <th>Km</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($rutas_disponibles as $ruta) { ?>
+                                    <tr>
+                                        <td><?= $ruta['Estado_Origen'] ?></td>
+                                        <td><?= $ruta['Municipio_Origen'] ?></td>
+                                        <td><?= $ruta['Estado_Destino'] ?></td>
+                                        <td><?= $ruta['Municipio_Destino'] ?></td>
+                                        <td><?= $ruta['Km'] ?></td>
+                                        <td><input type="checkbox" name="rutas_seleccionadas[]" value="<?= $ruta['ID_Ruta'] ?>"></td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+                <!-- Cerrar Modal para agregar rutas -->
+<script>document.getElementById('agregarRuta').addEventListener('click', function() {
+    // Obtener los valores seleccionados de los puntos de origen y destino
+    var puntoA = document.getElementById('puntoA_origen').value;
+    var puntoB = document.getElementById('puntoB_destino').value;
+
+    // Verificar que ambos valores hayan sido seleccionados
+    if (puntoA && puntoB) {
+        // Crear una nueva fila para la tabla
+        var tablaBody = document.getElementById('rutasBody');
+        var nuevaFila = document.createElement('tr');
+        
+        // Crear celdas para la fila
+        var celdaPuntoA = document.createElement('td');
+        celdaPuntoA.textContent = puntoA;
+
+        var celdaPuntoB = document.createElement('td');
+        celdaPuntoB.textContent = puntoB;
+
+        // Celda para el botón de eliminar
+        var celdaAcciones = document.createElement('td');
+        var botonEliminar = document.createElement('button');
+        botonEliminar.textContent = 'Eliminar';
+        botonEliminar.className = 'btn btn-danger btn-sm';
+        botonEliminar.addEventListener('click', function() {
+            // Eliminar la fila cuando se haga clic en "Eliminar"
+            nuevaFila.remove();
+        });
+
+        celdaAcciones.appendChild(botonEliminar);
+
+        // Añadir las celdas a la nueva fila
+        nuevaFila.appendChild(celdaPuntoA);
+        nuevaFila.appendChild(celdaPuntoB);
+        nuevaFila.appendChild(celdaAcciones);
+
+        // Añadir la nueva fila a la tabla
+        tablaBody.appendChild(nuevaFila);
+
+        // Limpiar las selecciones del formulario
+        document.getElementById('puntoA_origen').value = '';
+        document.getElementById('puntoB_destino').value = '';
+    } else {
+        alert('Por favor seleccione tanto el Punto A de Origen como el Punto B de Destino.');
+    }
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Incluye jQuery y Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
