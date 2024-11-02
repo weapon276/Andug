@@ -64,6 +64,21 @@ function obtenerRutasDisponibles($conn) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Función para obtener camiones libres
+function obtenerDollyLibres($conn) {
+    $sql = "SELECT ID_Dolly, PesoDolly,Marca,Placas FROM dolly WHERE estado = 'en servicio'";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+// Función para obtener camiones libres
+function obtenerRemolque($conn) {
+    $sql = "SELECT id_remolque, tipo_remolque,placas FROM remolque WHERE estado = 'en servicio'";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $municipioDestino) {
     try {
         $sql = "SELECT ID_Ruta, Estado_Origen, Municipio_Origen, Estado_Destino, Municipio_Destino, Km 
@@ -89,6 +104,8 @@ function obtenerRutas($conn, $estadoOrigen, $municipioOrigen, $estadoDestino, $m
 $clientes = obtenerClientes($conn);
 $empleado = obtenerNombreEmpleado($conn, $usuario_id);
 $camiones_libres = obtenerCamionesLibres($conn);
+$Dolly_libres = obtenerDollyLibres($conn);
+$remolques_libres = obtenerRemolque($conn);
 $contenedores = obtenerContenedores($conn);
 $rutas_disponibles = obtenerRutasDisponibles($conn);
 
@@ -235,8 +252,35 @@ $id_viaje = $conn->lastInsertId();
             }, 3000); // Redirigir después de 3 segundos
         });
     </script>';
-}
 
+
+
+
+    // Consultar el camión seleccionado
+$camion_id = $_POST['camiones_libres'];
+$sql_camion = "SELECT Peso FROM camion WHERE ID_Camion = $camion_id";
+$result_camion = $conn->query($sql_camion);
+$camion = $result_camion->fetch_assoc();
+
+// Consultar el remolque seleccionado
+$remolque_id = $_POST['remolques_libres']; // Asume que tienes un select para el remolque
+$sql_remolque = "SELECT PesoR FROM remolque WHERE id_remolque = $remolque_id";
+$result_remolque = $conn->query($sql_remolque);
+$remolque = $result_remolque->fetch_assoc();
+
+// Consultar el dolly seleccionado
+$dolly_id = $_POST['Dolly_libres']; // Asume que tienes un select para el dolly
+$sql_dolly = "SELECT PesoDolly FROM dolly WHERE ID_Dolly = $dolly_id";
+$result_dolly = $conn->query($sql_dolly);
+$dolly = $result_dolly->fetch_assoc();
+
+// Consultar el contenedor seleccionado
+$contenedor_id = $_POST['contenedores'];
+$sql_contenedor = "SELECT Peso FROM contenedor WHERE ID_Contenedor = $contenedor_id";
+$result_contenedor = $conn->query($sql_contenedor);
+$contenedor = $result_contenedor->fetch_assoc();
+    
+}
 
 ?>
 
@@ -281,30 +325,76 @@ $id_viaje = $conn->lastInsertId();
                 <input type="text" class="form-control" value="<?php echo htmlspecialchars($empleado['NombreCompleto']); ?>" disabled>
                 <input type="hidden" name="empleado" value="<?php echo htmlspecialchars($empleado['ID_Empleado']); ?>">
             </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="monto" class="form-label">Monto</label>
-            <input type="number" step="0.01" class="form-control" id="monto" name="monto" required>
-        </div>
-        <div class="mb-3">
-            <label for="fecha" class="form-label">Fecha</label>
-            <input type="date" class="form-control" id="fecha" name="fecha" required>
-        </div>
-        <div class="mb-3">
-            <label for="vigencia" class="form-label">Vigencia</label>
-            <input type="date" class="form-control" id="vigencia" name="vigencia" required>
-        </div>
-        <div class="mb-3">
-            <label for="dias_credito" class="form-label">Días de Crédito</label>
-            <input type="number" class="form-control" id="dias_credito" name="dias_credito" required>
-        </div>
-        <div class="mb-3">
-            <label for="peso" class="form-label">Peso</label>
-            <input type="number" step="0.01" class="form-control" id="peso" name="peso" required>
-        </div>
+        <<div class="mb-3"> 
+    <label for="descripcion" class="form-label">Descripción</label>
+    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+</div>
+<div class="mb-3">
+    <label for="monto" class="form-label">Monto</label>
+    <input type="number" step="0.01" class="form-control" id="monto" name="monto" required>
+</div>
+<div class="mb-3">
+    <label for="fecha" class="form-label">Fecha</label>
+    <input type="date" class="form-control" id="fecha" name="fecha" required>
+</div>
+<div class="mb-3">
+    <label for="vigencia" class="form-label">Vigencia</label>
+    <input type="date" class="form-control" id="vigencia" name="vigencia" required>
+</div>
+<div class="mb-3">
+    <label for="dias_credito" class="form-label">Días de Crédito</label>
+    <input type="number" class="form-control" id="dias_credito" name="dias_credito" required>
+</div>
+<div class="mb-3">
+    <label for="peso" class="form-label">Peso</label>
+    <input type="number" step="0.01" class="form-control" id="peso" name="peso" required readonly>
+</div>
+
+
+<script>
+    // Pasar los valores de PHP a JavaScript
+    var pesoCamion = <?= $camion['Peso'] ?>;
+    var pesoRemolque = <?= $remolque['PesoR'] ?>;
+    var pesoDolly = <?= $dolly['PesoDolly'] ?>;
+    var pesoContenedor = <?= $contenedor['Peso'] ?>;
+
+    // Función para calcular el peso total
+    function calcularPeso() {
+        // Calcular el total de peso: sumar los pesos y restar 75 toneladas (75,000 kg)
+        var totalPeso = pesoCamion + pesoRemolque + pesoDolly + pesoContenedor - (75 * 1000); // Convertir toneladas a kg
+        document.getElementById('peso').value = totalPeso.toFixed(2); // Mostrar el resultado con 2 decimales
+    }
+
+    // Ejecutar la función cuando se carga la página
+    window.onload = calcularPeso;
+</script>
+
+<!-- Select para "Tipo de pago" -->
+<div class="mb-3">
+    <label for="tipo_pago" class="form-label">Tipo de Pago</label>
+    <select class="form-control" id="tipo_pago" name="tipo_pago" required>
+        <option value="PUE">PUE - Pago en una sola exhibición</option>
+        <option value="CREDITO">CREDITO - Crédito</option>
+    </select>
+</div>
+
+<!-- Select para "Categoría de mercancía" -->
+<div class="mb-3">
+    <label for="categoria_mercancia" class="form-label">Categoría de Mercancía</label>
+    <select class="form-control" id="categoria_mercancia" name="categoria_mercancia" required>
+    <option value="Contenerizada">Contenerizada</option>
+        <option value="productos_manufacturados">Productos manufacturados: Electrónica, textiles, muebles, autopartes</option>
+        <option value="productos_consumo_masivo">Productos de consumo masivo: Alimentos enlatados, bebidas, productos de limpieza</option>
+        <option value="articulos_personales">Artículos personales: Mudanzas, envíos de hogar</option>
+        <option value="productos_agricolas">Productos agrícolas: Granos, semillas, fertilizantes, frutas, verduras</option>
+        <option value="productos_quimicos">Productos químicos: Ácidos, bases, solventes, alimentos líquidos (vino, zumos, aceites), gases</option>
+        <option value="maquinaria_equipos">Maquinaria y equipos: Vehículos, maquinaria pesada, equipos de construcción, maquinaria agrícola, transformadores, turbinas</option>
+        <option value="materiales_construccion">Materiales de construcción: Tubos, vigas de acero, bobinas de acero, placas de madera</option>
+        <option value="otros">Otros: Flores y plantas, medicamentos, vacunas, barcos, aeronaves (desarmadas), yates</option>
+        <option value="N/A">N/a: No Aplica</option>
+    </select>
+</div>
+
         <h2>Detalles del Traslado</h2>
 
 <!-- Selección de rutas -->
@@ -350,28 +440,46 @@ $id_viaje = $conn->lastInsertId();
     </tbody>
 </table>
 
-        <h2>Detalles de la Flotilla</h2>
-        <div class="mb-3">
-    <label for="camiones_libres" class="form-label">Seleccionar Camiones Libres</label>
-    <select class="form-select" id="camiones_libres" name="camiones_libres[]" required>
-    <?php foreach ($camiones_libres as $camion): ?>
-        <option value="<?php echo $camion['ID_Camion']; ?>"><?php echo htmlspecialchars($camion['Placas']); ?></option>
-    <?php endforeach; ?>
-    </select>
-</div>
-<div class="form-group">
-            <label for="tipo_camiones">Tipo de Contenedor</label>
-            <select id="tipo_camiones" name="tipo_camiones" class="form-control">
-                <?php foreach ($contenedores as $contenedor) { ?>
-                    <option value="<?= $contenedor['ID_Contenedor'] ?>"><?= $contenedor['Tipo'] ?> (Peso: <?= $contenedor['Peso'] ?>, Dimensiones: <?= $contenedor['Dimensiones'] ?>)</option>
-                <?php } ?>
-            </select>
-        </div>
+<form method="POST" action="">
+    <h2>Detalles de la Flotilla</h2>
+    <div class="mb-3">
+        <label for="camiones_libres" class="form-label">Seleccionar Camiones Libres</label>
+        <select class="form-select" id="camiones_libres" name="camiones_libres" required>
+            <?php foreach ($camiones_libres as $camion): ?>
+                <option value="<?php echo $camion['ID_Camion']; ?>"><?php echo htmlspecialchars($camion['Placas']); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-        <div class="form-group">
-            <label for="capacidad_camiones">Capacidad de Carga del Camión</label>
-            <input type="number" id="capacidad_camiones" name="capacidad_camiones" class="form-control" required>
-        </div>
+    <div class="mb-3">
+        <label for="remolque" class="form-label">Seleccionar Remolque</label>
+        <select class="form-select" id="remolque" name="remolque" required>
+            <?php foreach ($remolques_libres as $remolque): ?>
+                <option value="<?php echo $remolque['id_remolque']; ?>"><?php echo htmlspecialchars($remolque['tipo_remolque']); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="dolly" class="form-label">Seleccionar Dolly</label>
+        <select class="form-select" id="dolly" name="dolly" required>
+            <?php foreach ($Dolly_libres as $dolly): ?>
+                <option value="<?php echo $dolly['ID_Dolly']; ?>"><?php echo htmlspecialchars($dolly['Marca']); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="tipo_camiones">Tipo de Contenedor</label>
+        <select id="tipo_camiones" name="tipo_camiones" class="form-control">
+            <?php foreach ($contenedores as $contenedor) { ?>
+                <option value="<?= $contenedor['ID_Contenedor'] ?>"><?= $contenedor['Tipo'] ?> (Peso: <?= $contenedor['Peso'] ?>, Dimensiones: <?= $contenedor['Dimensiones'] ?>)</option>
+            <?php } ?>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Calcular Capacidad</button>
+</form>
         <button type="submit" class="btn btn-primary">Crear Cotización</button>
     </form>
 </div>
@@ -418,7 +526,8 @@ $id_viaje = $conn->lastInsertId();
             </div>
         </div>
                 <!-- Cerrar Modal para agregar rutas -->
-<script>document.getElementById('agregarRuta').addEventListener('click', function() {
+<script>
+document.getElementById('agregarRuta').addEventListener('click', function() {
     // Obtener los valores seleccionados de los puntos de origen y destino
     var puntoA = document.getElementById('puntoA_origen').value;
     var puntoB = document.getElementById('puntoB_destino').value;
@@ -463,7 +572,8 @@ $id_viaje = $conn->lastInsertId();
         alert('Por favor seleccione tanto el Punto A de Origen como el Punto B de Destino.');
     }
 });
-</script>
+    </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Incluye jQuery y Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
