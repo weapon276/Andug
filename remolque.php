@@ -62,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['agregar_remolque'])) 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <title>Gestión de Remolques</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
@@ -77,53 +79,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['agregar_remolque'])) 
         Agregar nuevo remolque
     </button>
 
-    <!-- Tabla que muestra los remolques -->
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tipo</th>
-                <th>Subtipo</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Año</th>
-                <th>Placas</th>
-                <th>Capacidad de carga</th>
-                <th>Dimensiones</th>
-                <th>Estado</th>
-                <th>Observaciones</th>
-                <th>Fecha de alta</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Consulta para obtener los remolques de la base de datos
-            $sql = "SELECT * FROM remolque";
-            $stmt = $conn->query($sql);
+   <!-- Tabla que muestra los remolques -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Subtipo</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Año</th>
+            <th>Placas</th>
+            <th>Capacidad de carga</th>
+            <th>Dimensiones</th>
+            <th>Estado</th>
+            <th>Observaciones</th>
+            <th>Fecha de alta</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        // Consulta para obtener los remolques de la base de datos
+        $sql = "SELECT * FROM remolque";
+        $stmt = $conn->query($sql);
 
-            if ($stmt->rowCount() > 0) {
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    echo "<tr>
-                            <td>{$row['id_remolque']}</td>
-                            <td>{$row['tipo_remolque']}</td>
-                            <td>{$row['subtipo_remolque']}</td>
-                            <td>{$row['marca']}</td>
-                            <td>{$row['modelo']}</td>
-                            <td>{$row['año']}</td>
-                            <td>{$row['placas']}</td>
-                            <td>{$row['capacidad_carga']}</td>
-                            <td>{$row['dimensiones']}</td>
-                            <td>{$row['estado']}</td>
-                            <td>{$row['observaciones']}</td>
-                            <td>{$row['fecha_alta']}</td>
-                          </tr>";
+        if ($stmt->rowCount() > 0) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                // Determinar la clase según el estado (Status)
+                $statusClass = '';
+                switch (strtolower($row['estado'])) { // Aseguramos el manejo insensible a mayúsculas/minúsculas
+                    case 'en curso':
+                        $statusClass = 'table-primary'; // Azul
+                        break;
+                    case 'en servicio':
+                        $statusClass = 'table-success'; // Verde
+                        break;
+                    case 'dado de baja':
+                        $statusClass = 'table-danger'; // Rojo
+                        break;
+                    case 'suspendido':
+                        $statusClass = 'table-warning'; // Amarillo
+                        break;
+                    default:
+                        $statusClass = ''; // Sin clase adicional
                 }
-            } else {
-                echo "<tr><td colspan='12'>No hay remolques registrados</td></tr>";
+                // Mostrar la fila con la clase asignada
+                echo "<tr class='{$statusClass}'>
+                        <td>{$row['id_remolque']}</td>
+                        <td>{$row['tipo_remolque']}</td>
+                        <td>{$row['subtipo_remolque']}</td>
+                        <td>{$row['marca']}</td>
+                        <td>{$row['modelo']}</td>
+                        <td>{$row['año']}</td>
+                        <td>{$row['placas']}</td>
+                        <td>{$row['capacidad_carga']}</td>
+                        <td>{$row['dimensiones']}</td>
+                        <td>{$row['estado']}</td>
+                        <td>{$row['observaciones']}</td>
+                        <td>{$row['fecha_alta']}</td>
+                      </tr>";
             }
-            ?>
-        </tbody>
-    </table>
+        } else {
+            // En caso de que no haya registros
+            echo "<tr><td colspan='12' class='text-center'>No hay remolques registrados</td></tr>";
+        }
+        ?>
+    </tbody>
+</table>
+
 </div>
 
 <!-- Modal para agregar un nuevo remolque -->

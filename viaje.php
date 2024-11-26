@@ -92,6 +92,7 @@ if ($id_viaje && $id_camion && $id_operador && $id_cliente && $id_ruta && $id_co
     // Manejar el caso en el que faltan datos obligatorios
     echo "Error: Faltan campos obligatorios.";
 }
+
 ?>
 
 
@@ -100,7 +101,7 @@ if ($id_viaje && $id_camion && $id_operador && $id_cliente && $id_ruta && $id_co
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Viajes</title>
+    <title>DashBoard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -110,14 +111,14 @@ if ($id_viaje && $id_camion && $id_operador && $id_cliente && $id_ruta && $id_co
 <body>
 
 <div class="container mt-4">
-    <h2>Gestión de Viajes</h2>
+    <h2></h2>
     <table class="table table-bordered">
         <thead>
             <tr>
                 <th>ID Viaje</th>
-                <th>ID Camión</th>
-                <th>ID Operador</th>
-                <th>ID Cliente</th>
+                <th>Camión</th>
+                <th>Operador</th>
+                <th>Cliente</th>
                 <th>Ruta</th>
                 <th>Cotización</th>
                 <th>Fecha Despacho</th>
@@ -130,72 +131,84 @@ if ($id_viaje && $id_camion && $id_operador && $id_cliente && $id_ruta && $id_co
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['ID_Viaje'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['ID_Camion'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['ID_Operador'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['ID_Cliente'] ?? ''); ?></td>
-                <td>
-                    <?php
-                    $ruta_id = $row['Fk_IdRutas'];
-                    $ruta_sql = "SELECT Estado_Origen, Municipio_Origen, Estado_Destino, Municipio_Destino FROM rutas WHERE ID_Ruta = ?";
-                    $stmt = $conn->prepare($ruta_sql);
-                    $stmt->execute([$ruta_id]);
-                    $ruta_result = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($ruta_result) {
-                        echo htmlspecialchars($ruta_result['Estado_Origen'] . ' - ' . $ruta_result['Municipio_Origen'] . ' a ' . $ruta_result['Estado_Destino'] . ' - ' . $ruta_result['Municipio_Destino']);
-                    } else {
-                        echo 'Ruta no encontrada';
-                    }
-                    ?>
-                </td>
-                <td>
-                    <?php
-                    $cotizacion_id = $row['Fk_IdCotizacion'];
-                    $cotizacion_sql = "SELECT Descripcion FROM cotizacion WHERE ID_Cotizacion = ?";
-                    $stmt = $conn->prepare($cotizacion_sql);
-                    $stmt->execute([$cotizacion_id]);
-                    $cotizacion_result = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($cotizacion_result) {
-                        echo htmlspecialchars($cotizacion_result['Descripcion']);
-                    } else {
-                        echo 'Cotización no encontrada';
-                    }
-                    ?>
-                    <td>
-    <?php if (!empty($row['Archivo_Pedimento'])): ?>
-        <a href="<?php echo $row['Archivo_Pedimento']; ?>" target="_blank">Ver Pedimento</a>
-    <?php else: ?>
-        No adjunto
-    <?php endif; ?>
-</td>
+    <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): 
+        // Determinar la clase según el Status
+        $statusClass = '';
+        switch ($row['Status']) {
+            case 'En Curso':
+                $statusClass = 'table-primary'; // Azul
+                break;
+            case 'Completado':
+                $statusClass = 'table-success'; // Verde
+                break;
+            case 'Cancelado':
+                $statusClass = 'table-danger'; // Rojo
+                break;
+            case 'Suspendido':
+                $statusClass = 'table-warning'; // Amarillo
+                break;
+            default:
+                $statusClass = ''; // Sin clase adicional
+        }
+    ?>
+    <tr class="<?php echo $statusClass; ?>">
+        <td><?php echo htmlspecialchars($row['ID_Viaje'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['ID_Camion'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['Nombre'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['ID_Cliente'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($cotizacion['ClienteNombre'] ?? ''); ?></td>
+        <td>
+            <?php
+            $ruta_id = $row['Fk_IdRutas'];
+            $stmt = $conn->prepare("SELECT Estado_Origen, Municipio_Origen, Estado_Destino, Municipio_Destino FROM rutas WHERE ID_Ruta = ?");
+            $stmt->execute([$ruta_id]);
+            $ruta_result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($ruta_result) {
+                echo htmlspecialchars($ruta_result['Estado_Origen'] . ' - ' . $ruta_result['Municipio_Origen'] . ' a ' . $ruta_result['Estado_Destino'] . ' - ' . $ruta_result['Municipio_Destino']);
+            } else {
+                echo 'Ruta no encontrada';
+            }
+            ?>
+        </td>
+        <td>
+            <?php
+            $cotizacion_id = $row['Fk_IdCotizacion'];
+            $stmt = $conn->prepare("SELECT Descripcion FROM cotizacion WHERE ID_Cotizacion = ?");
+            $stmt->execute([$cotizacion_id]);
+            $cotizacion_result = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo $cotizacion_result ? htmlspecialchars($cotizacion_result['Descripcion']) : 'Cotización no encontrada';
+            ?>
+        </td>
+        <td><?php echo htmlspecialchars($row['Fecha_Despacho'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['Fecha_Llegada'] ?? ''); ?></td>
+        <td>
+            <?php if (!empty($row['Archivo_Pedimento'])): ?>
+                <a href="<?php echo $row['Archivo_Pedimento']; ?>" target="_blank">Ver Pedimento</a>
+            <?php else: ?>
+                No adjunto
+            <?php endif; ?>
+        </td>
+        <td><?php echo htmlspecialchars($row['Contenedores'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['Gastos'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($row['Status'] ?? ''); ?></td>
+        <td>
+            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal" 
+                data-id="<?php echo $row['ID_Viaje']; ?>"
+                data-camion="<?php echo htmlspecialchars($row['ID_Camion']); ?>"
+                data-operador="<?php echo htmlspecialchars($row['ID_Operador']); ?>"
+                data-cliente="<?php echo htmlspecialchars($row['ID_Cliente']); ?>"
+                data-fecha-despacho="<?php echo htmlspecialchars($row['Fecha_Despacho']); ?>"
+                data-fecha-llegada="<?php echo htmlspecialchars($row['Fecha_Llegada']); ?>"
+                data-pedimentos="<?php echo htmlspecialchars($row['Pedimentos']); ?>"
+                data-contenedores="<?php echo htmlspecialchars($row['Contenedores']); ?>"
+                data-gastos="<?php echo htmlspecialchars($row['Gastos']); ?>"
+                data-status="<?php echo htmlspecialchars($row['Status']); ?>"
+            >Modificar</button>
+        </td>
+    </tr>
+    <?php endwhile; ?>
+</tbody>
 
-                </td>
-                <td><?php echo htmlspecialchars($row['Fecha_Despacho'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['Fecha_Llegada'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['Pedimentos'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['Contenedores'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['Gastos'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($row['Status'] ?? ''); ?></td>
-                <td>
-                    <!-- Botón para abrir el modal de modificar -->
-                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal" 
-                        data-id="<?php echo $row['ID_Viaje']; ?>"
-                        data-camion="<?php echo htmlspecialchars($row['ID_Camion']); ?>"
-                        data-operador="<?php echo htmlspecialchars($row['ID_Operador']); ?>"
-                        data-cliente="<?php echo htmlspecialchars($row['ID_Cliente']); ?>"
-                        data-fecha-despacho="<?php echo htmlspecialchars($row['Fecha_Despacho']); ?>"
-                        data-fecha-llegada="<?php echo htmlspecialchars($row['Fecha_Llegada']); ?>"
-                        data-pedimentos="<?php echo htmlspecialchars($row['Pedimentos']); ?>"
-                        data-contenedores="<?php echo htmlspecialchars($row['Contenedores']); ?>"
-                        data-gastos="<?php echo htmlspecialchars($row['Gastos']); ?>"
-                        data-status="<?php echo htmlspecialchars($row['Status']); ?>"
-                    >Modificar</button>
-                </td>
-            </tr>
-            <?php endwhile; ?>
-        </tbody>
     </table>
 </div>
 

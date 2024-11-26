@@ -70,7 +70,7 @@ function calcularEstadoVigencia($vigencia) {
 <!--Fin de margen -->
 <body>
 <div class="container mt-5">
-    <h1>Gestión de Cotizaciones</h1>
+    <h1></h1>
     
     <!-- Cuadro de búsqueda -->
     <input class="form-control mb-3" id="busqueda" type="text" placeholder="Buscar cotización...">
@@ -80,7 +80,7 @@ function calcularEstadoVigencia($vigencia) {
             <tr>
                 <th>ID Cotización</th>
                 <th>Cliente</th>
-                <th>lO atiende</th>
+                <th>Lo atiende</th>
                 <th>Descripción</th>
                 <th>Monto</th>
                 <th>Fecha</th>
