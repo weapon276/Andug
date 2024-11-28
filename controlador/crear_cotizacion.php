@@ -1,5 +1,5 @@
 <?php
-include 'conexion.php'; // Archivo de conexión a la base de datos
+include '../modelo/conexion.php';
 
 // Obtener datos JSON de la solicitud POST
 $data = json_decode(file_get_contents('php://input'), true);

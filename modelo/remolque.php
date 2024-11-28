@@ -1,6 +1,6 @@
 <?php
 include 'conexion.php'; // Asegúrate de que la conexión a la base de datos esté configurada correctamente.
-include 'index.php';
+include '../index.php';
 session_start(); // Asegúrate de iniciar la sesión
 
 // Verificar si el usuario está autenticado

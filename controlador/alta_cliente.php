@@ -1,8 +1,8 @@
 
 <?php
 
-include 'conexion.php';
-include 'index.php';
+include '../modelo/conexion.php';
+include '../index.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">

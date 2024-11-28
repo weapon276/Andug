@@ -1,7 +1,7 @@
 <?php
 
-include 'conexion.php';
-include 'index.php';
+include '../modelo/conexion.php';
+include '../index.php';
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userType'])) {

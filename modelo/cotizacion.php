@@ -1,6 +1,6 @@
 <?php
 include 'conexion.php';
-include 'index.php';
+include '../index.php';
 
 // Iniciar la sesión
 session_start();

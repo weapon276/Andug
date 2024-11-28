@@ -1,6 +1,6 @@
 <?php
-require 'conexion.php'; 
-include 'index.php';
+require '../modelo/conexion.php'; 
+include '../index.php';
 
 
 // Manejo de formularios

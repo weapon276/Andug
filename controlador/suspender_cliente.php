@@ -1,5 +1,6 @@
 <?php
-include 'conexion.php';
+include '../modelo/conexion.php';
+include '../index.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_cliente = $_POST['id_cliente'];

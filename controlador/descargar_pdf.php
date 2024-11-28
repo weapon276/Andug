@@ -1,6 +1,6 @@
 <?php
-include 'conexion.php';
-require('fpdf/fpdf.php');
+include '../modelo/conexion.php';
+require('assets/fpdf/fpdf.php');
 session_start();
 
 // Verificar si el parámetro id_factura está presente y el usuario está autenticado

@@ -1,6 +1,6 @@
 <?php
 require 'conexion.php';
-require 'index.php';
+require '../index.php';
 
 if (!isset($_SESSION['userType']) || !isset($_SESSION['userId'])) {
     header("Location: login.php");

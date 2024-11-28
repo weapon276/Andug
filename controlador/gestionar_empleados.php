@@ -1,8 +1,6 @@
 <?php
-include 'conexion.php';
-include 'index.php';
-
-
+include '../modelo/conexion.php';
+include '../index.php';
 session_start(); // Asegúrate de iniciar la sesión
 
 // Verificar si el usuario está autenticado
@@ -40,21 +38,15 @@ function eliminarEmpleado($conn, $id, $comentarios) {
 
     // Cambiar el estado del empleado a "Baja"
     cambiarEstadoEmpleado($conn, $id, 'Baja');
-        // Cambiar el estado del empleado a "Activo"
-        cambiarEstadoEmpleado($conn, $id, 'Activo');
 }
-
-
 
 // Verificar las acciones del formulario
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['ausentar'])) {
-        cambiarEstadoEmpleado($conn, $_POST['id_empleado'], 'Ausente');
+        cambiarEstadoEmpleado($conn, $_POST['id_empleado'], 'ausente');
     } elseif (isset($_POST['eliminar'])) {
         eliminarEmpleado($conn, $_POST['id_empleado'], $_POST['comentarios']);
-    }  elseif (isset($_POST['activar'])) 
-        cambiarEstadoEmpleado($conn, $_POST['id_empleado'], 'Activar');
-    
+    }
 }
 
 $empleados = obtenerEmpleados($conn);
@@ -63,7 +55,7 @@ $empleados = obtenerEmpleados($conn);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gestionar Usuarios</title>
+    <title>Gestionar Empleados</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -72,7 +64,7 @@ $empleados = obtenerEmpleados($conn);
 <!--Fin de margen -->
 <body>
 <div class="container mt-5">
-    <h1>Gestionar Usuarios</h1>
+    <h1>Gestionar Empleados</h1>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -101,7 +93,7 @@ $empleados = obtenerEmpleados($conn);
                     <?php 
                     if ($empleado['Status'] == 'Activo') {
                         echo '<span class="badge bg-success">Activo</span>';
-                    } elseif ($empleado['Status'] == 'Ausente') {
+                    } elseif ($empleado['Status'] == 'ausente') {
                         echo '<span class="badge bg-warning">Ausente</span>';
                     } else {
                         echo '<span class="badge bg-danger">Baja</span>';
@@ -111,14 +103,6 @@ $empleados = obtenerEmpleados($conn);
                 <td><?php echo $empleado['fecha_inicio']; ?></td>
                 <td><?php echo $empleado['fecha_final']; ?></td>
                 <td>
-                <form method="post" class="d-inline">
-                        <input type="hidden" name="id_empleado" value="<?php echo $empleado['ID_Empleado']; ?>">
-                        <button type="submit" name="activo" class="btn btn-primary btn-sm">Activo</button>
-                    </form>
-                    <form method="post" class="d-inline">
-                        <input type="hidden" name="id_empleado" value="<?php echo $empleado['ID_Empleado']; ?>">
-                        <button type="submit" name="modificar" class="btn btn-primary btn-sm">Modificar</button>
-                    </form>
                     <form method="post" class="d-inline">
                         <input type="hidden" name="id_empleado" value="<?php echo $empleado['ID_Empleado']; ?>">
                         <button type="submit" name="ausentar" class="btn btn-warning btn-sm">Ausentar</button>

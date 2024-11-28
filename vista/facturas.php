@@ -1,6 +1,6 @@
 <?php
-include 'conexion.php';
-include 'index.php';
+include '../modelo/conexion.php';
+include '../index.php';
 session_start(); // Asegúrate de iniciar la sesión
 
 // Verificar si el usuario está autenticado

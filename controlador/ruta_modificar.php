@@ -1,6 +1,6 @@
 <?php
-// Incluye la conexión a la base de datos
-require_once 'conexion.php';
+include '../modelo/conexion.php';
+include '../index.php';
 
 // Verifica si el formulario ha sido enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

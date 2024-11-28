@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'conexion.php';
+require 'modelo/conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];

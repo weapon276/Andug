@@ -1,8 +1,8 @@
 <?php
 
-include 'conexion.php';
-include 'index.php';
-require('fpdf/fpdf.php');
+include '../modelo/conexion.php';
+include '../index.php';
+require('assets/fpdf/fpdf.php');
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userType'])) {

@@ -1,12 +1,12 @@
 <?php
 
-include 'conexion.php';
-include 'index.php';
+include '../modelo/conexion.php';
+include '../index.php';
 session_start(); // Asegúrate de iniciar la sesión
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userType']) || !isset($_SESSION['userId'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 

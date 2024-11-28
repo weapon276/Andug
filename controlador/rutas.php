@@ -1,6 +1,6 @@
 <?php
-require 'conexion.php';
-require 'index.php';
+require '../modelo/conexion.php';
+require '../index.php';
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userId'])) {

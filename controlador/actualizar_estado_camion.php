@@ -1,5 +1,6 @@
 <?php
-include 'conexion.php';
+include '../modelo/conexion.php';
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_ruta_camion = $_POST['id_ruta_camion'];

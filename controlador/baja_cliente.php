@@ -1,5 +1,5 @@
 <?php
-include 'conexion.php';
+include '../modelo/conexion.php';
 
 session_start(); // Asegúrate de iniciar la sesión
 

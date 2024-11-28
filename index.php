@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'conexion.php';
+require 'modelo/conexion.php';
 
 
 // Verificar si el usuario está autenticado
@@ -41,7 +41,7 @@ function verificarAcceso($user_type, $paginasPermitidas) {
         echo "<script>
             alert('No tienes acceso a esta página.');
             setTimeout(function() {
-                window.location.href = 'index.php';
+                window.location.href = '../index.php';
             }, 3000);
         </script>";
         exit();
@@ -57,7 +57,7 @@ switch ($user_type) {
         $paginasPermitidas = ['inicioa.php', 'gestionar_usuarios.php', 'gestionar_empleado.php', 'gestionar_camiones.php'];
         break;
     case 'Contabilidad':
-        $paginasPermitidas = ['gestionar_cotizacion.php','cotizacion.php','remolque.php','index.php','viaje.php', 'cliente.php', 'gestion_camiones.php'];
+        $paginasPermitidas = ['gestionar_cotizacion.php','cotizacion.php','rutas.php','alta_cliente.php','facturas.php','gestionar_facturas.php','remolque.php','index.php','viaje.php', 'cliente.php', 'gestion_camiones.php'];
         break;
     case 'Recursos Humanos':
         $paginasPermitidas = ['index.php','inicio.php', 'gestionar_empleados.php', 'registrar_empleado.php'];
@@ -69,7 +69,7 @@ switch ($user_type) {
         $paginasPermitidas = ['cliente_viajes.php', 'consultar_facturas.php'];
         break;
     default:
-        $paginasPermitidas = ['index.php']; // Página por defecto
+        $paginasPermitidas = ['../index.php']; // Página por defecto
         break;
 }
 
@@ -94,16 +94,16 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='generar_reportes.php' class='nav-link'><i class='fas fa-chart-line'></i> Generar reportes</a></li>";
             break;
         case 'Contabilidad':
-            $menu .= "<li class='nav-item'><a href='viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Inicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='../modelo/viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Inicio</a></li>";
             $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
-            $menu .= "<li class='nav-item'><a href='remolque.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Remolques</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
+            $menu .= "<li class='nav-item'><a href='../modelo/remolque.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Remolques</a></li>";
+            $menu .= "<li class='nav-item'><a href='../vista/gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar Cotizacion</a></li>";
-            $menu .= "<li class='nav-item'><a href='cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
-            $menu .= "<li class='nav-item'><a href='facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
-            $menu .= "<li class='nav-item'><a href='alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
-            $menu .= "<li class='nav-item'><a href='rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";
+            $menu .= "<li class='nav-item'><a href='modelo/cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
+            $menu .= "<li class='nav-item'><a href='vista/facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
+            $menu .= "<li class='nav-item'><a href='controlador/rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";
             break;
         case 'Recursos Humanos':
             $menu .= "<li class='nav-item'><a href='inicio.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
