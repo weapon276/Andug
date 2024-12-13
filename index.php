@@ -85,36 +85,36 @@ function generarMenu($user_type) {
             break;
         case 'Administrador':
             $menu .= "<li class='nav-item'><a href='inicioa.php' class='nav-link'><i class='fas fa-users'></i> Inicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_usuarios.php' class='nav-link'><i class='fas fa-users'></i> Usuarios</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_empleado.php' class='nav-link'><i class='fas fa-users'></i> Gestionar Empleados</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_camiones.php' class='nav-link'><i class='fas fa-truck'></i> Gestionar camiones</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_operadores.php' class='nav-link'><i class='fas fa-user'></i> Gestionar operadores</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_clientes.php' class='nav-link'><i class='fas fa-user-friends'></i> Gestionar clientes</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_viajes.php' class='nav-link'><i class='fas fa-route'></i> Gestionar viajes</a></li>";
-            $menu .= "<li class='nav-item'><a href='generar_reportes.php' class='nav-link'><i class='fas fa-chart-line'></i> Generar reportes</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_usuarios.php' class='nav-link'><i class='fas fa-users'></i> Usuarios</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_empleado.php' class='nav-link'><i class='fas fa-users'></i> Gestionar Empleados</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_camiones.php' class='nav-link'><i class='fas fa-truck'></i> Gestionar camiones</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_operadores.php' class='nav-link'><i class='fas fa-user'></i> Gestionar operadores</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_clientes.php' class='nav-link'><i class='fas fa-user-friends'></i> Gestionar clientes</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_viajes.php' class='nav-link'><i class='fas fa-route'></i> Gestionar viajes</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/generar_reportes.php' class='nav-link'><i class='fas fa-chart-line'></i> Generar reportes</a></li>";
             break;
         case 'Contabilidad':
-            $menu .= "<li class='nav-item'><a href='../modelo/viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Inicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
+            $menu .= "<li class='nav-item'><a href='modelo/viaje.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Inicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='../modelo/cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
             $menu .= "<li class='nav-item'><a href='../modelo/remolque.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Remolques</a></li>";
             $menu .= "<li class='nav-item'><a href='../vista/gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
             $menu .= "<li class='nav-item'><a href='../controlador/gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar Cotizacion</a></li>";
-            $menu .= "<li class='nav-item'><a href='modelo/cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
-            $menu .= "<li class='nav-item'><a href='vista/facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
+            $menu .= "<li class='nav-item'><a href='../modelo/cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
+            $menu .= "<li class='nav-item'><a href='../vista/facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
             $menu .= "<li class='nav-item'><a href='../controlador/alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
-            $menu .= "<li class='nav-item'><a href='controlador/rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";
             break;
         case 'Recursos Humanos':
             $menu .= "<li class='nav-item'><a href='inicio.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='gestionar_empleados.php' class='nav-link'><i class='fas fa-user-tie'></i> Gestionar empleados</a></li>";
-            $menu .= "<li class='nav-item'><a href='registrar_empleado.php' class='nav-link'><i class='fas fa-user-tie'></i> Registrar Empleado</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/gestionar_empleados.php' class='nav-link'><i class='fas fa-user-tie'></i> Gestionar empleados</a></li>";
+            $menu .= "<li class='nav-item'><a href='../controlador/registrar_empleado.php' class='nav-link'><i class='fas fa-user-tie'></i> Registrar Empleado</a></li>";
             break;
         case 'Operador':
             $menu .= "<li class='nav-item'><a href='viaje.php' class='nav-link'><i class='fas fa-route'></i> Gestionar viajes</a></li>";
             break;
         case 'Cliente':
-            $menu .= "<li class='nav-item'><a href='cliente_viajes.php' class='nav-link'><i class='fas fa-search-location'></i> Consultar viajes</a></li>";
+            $menu .= "<li class='nav-item'><a href='../vista/cliente_viajes.php' class='nav-link'><i class='fas fa-search-location'></i> Consultar viajes</a></li>";
             $menu .= "<li class='nav-item'><a href='consultar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Consultar facturas</a></li>";
             break;
         case 'Prospecto':

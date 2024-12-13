@@ -2,7 +2,7 @@
 session_start();
 session_unset();
 session_destroy();
-require 'conexion.php';
+require 'modelo/conexion.php';
 
 if (isset($_SESSION['userId'])) {
     $userId = $_SESSION['userId'];

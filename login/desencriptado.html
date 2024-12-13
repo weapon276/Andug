@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decodificador Base64</title>
+</head>
+<body>
+    <h1>Decodificar Texto Base64</h1>
+
+    <label for="textoBase64">Introduce el texto a decodificar en Base64:</label>
+    <input type="text" id="textoBase64" placeholder="Texto en Base64">
+    <button onclick="decodificar()">Decodificar</button>
+
+    <p id="resultado"></p>
+
+    <script>
+        function decodificarBase64(textoBase64) {
+            try {
+                return atob(textoBase64);
+            } catch (e) {
+                return "Texto Base64 no válido.";
+            }
+        }
+
+        function decodificar() {
+            const textoBase64 = document.getElementById("textoBase64").value;
+            const textoDecodificado = decodificarBase64(textoBase64);
+            document.getElementById("resultado").textContent = "Texto decodificado: " + textoDecodificado;
+        }
+    </script>
+</body>
+</html>
