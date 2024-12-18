@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="assets/css/modal.css">
 
     <style>
-
+        .rutaDetails {
+            display: none;
+        }
     </style>
-  </head>
+</head>
 <body>
-    <div class="container">
+     <div class="container">
         <header class="header">
             <h1 class="title">Servicios</h1>
             <div class="header-actions">
@@ -37,7 +39,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="sku-cell">TL-WN523N</td>
+                        <td class="sku-cell">RTMZO-MYT</td>
                         <td>Flete manzanillo a monterrey</td>
                         <td class="price-cell">$ 299.53 MXN</td>
                         <td>
@@ -49,9 +51,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sku-cell">TL-WNR200ND</td>
-                        <td>Adaptador de alta potencia USB inalámbrico N 300 Mbps 2.4 GHz con 2 antenas externas de 5 dBi</td>
-                        <td class="price-cell">$ 529.98 MXN</td>
+                    <td class="sku-cell">RTMZO-MYT</td>
+                        <td>Flete manzanillo a monterrey</td>
+                        <td class="price-cell">$ 299.53 MXN</td>
                         <td>
                             <div class="actions-cell">
                                 <button class="action-btn">📋</button>
@@ -61,8 +63,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sku-cell">TC-5</td>
-                        <td>Conector RJ45 para cable UTP categoría 5E</td>
+                    <td class="sku-cell">RTMZO-MYT</td>
+                        <td>Flete manzanillo a monterrey</td>
                         <td class="price-cell">$ 5.00 MXN</td>
                         <td>
                             <div class="actions-cell">
@@ -74,78 +76,7 @@
                     </tr>
                 </tbody>
             </table>
-<!-- Modal -->
-    <div id="modalNuevo" class="modal">
-        <div class="modal-content">
-            <button class="btn-close" id="btnCerrar">&times;</button>
-            <header class="header">
-                <h1>Nuevo Servicio</h1>
-            </header>
-            <form class="product-form" id="productForm">
-                <div class="form-sections">
-                    <section class="form-section" id="generales">
-                        <div class="form-group">
-                            <label for="servicio">Nombre de Servicio <span class="required">*</span></label>
-                            <input type="text" id="servicio" name="servicio" class="form-control" placeholder="Nombre del servicio" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="dservicio">Descripción del Servicio <span class="required">*</span></label>
-                            <input type="text" id="dservicio" name="dservicio" class="form-control" placeholder="Descripción del servicio" required>
-                        </div>
-                    </section>
 
-                    <section class="form-section" id="detalles">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="id">Clave del servicio</label>
-                                <input type="text" id="id" class="form-control" placeholder="Ejemplo: #F1234">
-                            </div>
-                            <div class="form-group">
-                                <label for="categoria">Categoría</label>
-                                <select id="categoria" class="form-control">
-                                    <option value="ruta">Ruta</option>
-                                    <option value="flete">Fletes</option>
-                                    <option value="otros">Otros</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="precio">Precio</label>
-                                <input type="number" id="precio" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="moneda">Moneda</label>
-                                <select id="moneda" class="form-control">
-                                    <option value="MXN">MXN - Peso mexicano</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <button type="reset" class="btn btn-secondary">Limpiar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-            <div class="pagination">
-                <span class="pagination-info">Mostrando 1 a 10 de 89 registros</span>
-                <div class="pagination-controls">
-                    <button class="page-btn">«</button>
-                    <button class="page-btn">‹</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">›</button>
-                    <button class="page-btn">»</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Modal -->
     <div id="modalNuevo" class="modal">
         <div class="modal-content">
@@ -175,8 +106,8 @@
                             <div class="form-group">
                                 <label for="categoria">Categoría</label>
                                 <select id="categoria" class="form-control">
-                                    <option value="ruta">Ruta</option>
                                     <option value="flete">Fletes</option>
+                                    <option value="ruta">Ruta</option>
                                     <option value="otros">Otros</option>
                                 </select>
                             </div>
@@ -194,6 +125,50 @@
                             </div>
                         </div>
                     </section>
+
+                    <!-- Configuracion Rutas -->
+                    <section class="form-section hidden" id="rutaDetails">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="estadoOrigen">Estado de Origen</label>
+                                <input type="text" id="estadoOrigen" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="municipioOrigen">Municipio de Origen</label>
+                                <input type="text" id="municipioOrigen" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="estadoDestino">Estado de Destino</label>
+                                <input type="text" id="estadoDestino" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="municipioDestino">Municipio de Destino</label>
+                                <input type="text" id="municipioDestino" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="kilometros">Kilómetros</label>
+                                <input type="number" id="kilometros" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="costoMantenimiento">Costo Mantenimiento</label>
+                                <input type="number" id="costoMantenimiento" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="costoCasetas">Costo Casetas</label>
+                                <input type="number" id="costoCasetas" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="costoGasolina">Costo Gasolina</label>
+                                <input type="number" id="costoGasolina" class="form-control">
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
                 <div class="form-actions">
@@ -203,10 +178,13 @@
             </form>
         </div>
     </div>
+
     <script>
         const btnNuevo = document.getElementById('btnNuevo');
         const modalNuevo = document.getElementById('modalNuevo');
         const btnCerrar = document.getElementById('btnCerrar');
+        const categoriaSelect = document.getElementById('categoria');
+        const rutaDetails = document.getElementById('rutaDetails');
 
         // Mostrar el modal
         btnNuevo.addEventListener('click', () => {
@@ -222,6 +200,15 @@
         window.addEventListener('click', (event) => {
             if (event.target === modalNuevo) {
                 modalNuevo.style.display = 'none';
+            }
+        });
+
+        // Show/hide Ruta-specific fields based on category selection
+        categoriaSelect.addEventListener('change', (event) => {
+            if (event.target.value === 'ruta') {
+                rutaDetails.classList.remove('hidden');
+            } else {
+                rutaDetails.classList.add('hidden');
             }
         });
     </script>

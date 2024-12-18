@@ -100,7 +100,7 @@ function generarMenu($user_type) {
             $menu .= "<li class='nav-item'><a href='../vista/gestion_camiones.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestionar Camiones</a></li>";
             $menu .= "<li class='nav-item'><a href='../controlador/gestionar_facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar facturas</a></li>";
             $menu .= "<li class='nav-item'><a href='gestionar_cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Gestionar Cotizacion</a></li>";
-            $menu .= "<li class='nav-item'><a href='../modelo/cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
+            $menu .= "<li class='nav-item'><a href='modelo/cotizacion.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Cotizacion</a></li>";
             $menu .= "<li class='nav-item'><a href='../vista/facturas.php' class='nav-link'><i class='fas fa-file-invoice'></i> Realizar Factura</a></li>";
             $menu .= "<li class='nav-item'><a href='../controlador/alta_cliente.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i> Registrar Cliente</a></li>";
             $menu .= "<li class='nav-item'><a href='../controlador/rutas.php' class='nav-link'><i class='fas fa-file-invoice-dollar'></i>Gestión de Rutas</a></li>";

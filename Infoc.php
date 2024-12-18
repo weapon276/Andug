@@ -299,9 +299,6 @@
             <div class="tabs">
                 <div class="tab active">Datos</div>
                 <div class="tab">Resumen</div>
-                <div class="tab">Soporte técnico</div>
-                <div class="tab">Control de acceso</div>
-                <div class="tab">Precios especiales</div>
             </div>
 
             <div class="tab-content">
@@ -344,10 +341,8 @@
                             </div>
                         </div>
                     </div>
+                    
                 </section>
-
-                <!-- Similar sections for Domicilios, Correos electrónicos, Teléfonos, and Contactos -->
-                <!-- Each section follows the same structure as the RFCs section -->
             </div>
         </main>
     </div>

@@ -16,7 +16,6 @@ body {
     margin: 0 auto;
 }
 
-/* Header Styles */
 .header {
     display: flex;
     justify-content: space-between;
@@ -61,7 +60,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Search Bar */
 .search-container {
     margin-bottom: 24px;
     animation: slideIn 0.5s ease-out;
@@ -83,7 +81,6 @@ body {
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
-/* Table Styles */
 .table-container {
     background: white;
     border-radius: 8px;
@@ -150,7 +147,6 @@ tr:hover {
     opacity: 1;
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: space-between;
@@ -191,7 +187,7 @@ tr:hover {
     border-color: #0ea5e9;
 }
 
-/* Animations */
+/* Animacion */
 @keyframes slideDown {
     from {
         opacity: 0;

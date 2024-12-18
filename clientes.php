@@ -1,7 +1,6 @@
 <?php
 include 'modelo/conexion.php';
 
-// Función para obtener todos los clientes
 function obtenerClientes($conn) {
     $sql = "SELECT c.*, 
                    (SELECT SUM(monto) FROM factura WHERE ID_Cliente = c.ID_Cliente) AS Factura,
@@ -15,7 +14,6 @@ function obtenerClientes($conn) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Función para obtener todas las facturas de un cliente
 function obtenerFacturasCliente($conn, $id_cliente) {
     $sql = "SELECT ID_Factura, Fecha, Monto, Estado_Pago, Total FROM factura WHERE fk_id_Cliente = :id_cliente";
     $stmt = $conn->prepare($sql);
@@ -26,7 +24,6 @@ function obtenerFacturasCliente($conn, $id_cliente) {
 
 $clientes = obtenerClientes($conn);
 
-// Manejar solicitudes AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
     $id_factura = $_GET['id_factura'];
     $sql = "SELECT * FROM factura WHERE ID_Factura = :id_factura";
@@ -56,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Clientes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/clientes.css">
     <link rel="stylesheet" href="assets/css/servicios.css">
     <link rel="stylesheet" href="assets/css/modal.css">
@@ -268,19 +266,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
             const form = document.getElementById('clienteForm');
             if (form.checkValidity()) {
                 const formData = new FormData(form);
-                // Here you would typically send this data to the server
                 console.log('Saving client:', Object.fromEntries(formData));
                 closeModal();
-                // After saving, you should refresh the client list
             } else {
                 form.reportValidity();
             }
         }
         function deleteClient(clientId) {
             if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
-                // Here you would typically send a request to the server to delete the client
                 console.log('Deleting client:', clientId);
-                // After deleting, you should refresh the client list
             }
         }
         function toggleCreditoFields() {
@@ -308,13 +302,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id_factura'])) {
             });
         }
         function changePage(direction) {
-            // Implement pagination logic here
             console.log('Changing page:', direction);
         }
-        // Event listeners
         document.getElementById('TipoCredito').addEventListener('change', toggleCreditoFields);
         document.querySelector('.search-input').addEventListener('input', searchClients);
-        // Initial setup
         toggleCreditoFields();
     </script>
 </body>
